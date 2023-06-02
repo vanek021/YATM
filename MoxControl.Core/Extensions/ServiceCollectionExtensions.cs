@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using MoxControl.Core.Services.BucketStorage.FileSystem;
+using YATM.Core.Services.BucketStorage.FileSystem;
 using YATM.Core.Services.BucketStorage;
 
 namespace YATM.Core.Extensions

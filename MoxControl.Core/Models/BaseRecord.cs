@@ -1,4 +1,4 @@
-﻿using MoxControl.Core.DataAnnotations;
+﻿using YATM.Core.DataAnnotations;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using YATM.Core.Interfaces;
