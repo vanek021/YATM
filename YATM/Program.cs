@@ -2,6 +2,7 @@ using Hangfire;
 using YATM.Core.Extensions;
 using YATM.Core.Models;
 using YATM.Data;
+using YATM.Data.Seeds;
 using YATM.Models.Entities;
 using YATM.Services;
 
@@ -74,5 +75,7 @@ app.MapRazorPages();
 app.MapBlazorHub();
 
 app.MapFallbackToPage("/_Host");
+
+UserSeeds.Initialize(app.Services);
 
 app.Run();

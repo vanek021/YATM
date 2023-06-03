@@ -20,4 +20,8 @@
     <ProjectReference Include="..\YATM.Models\YATM.Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\lib\" />
+  </ItemGroup>
+
 </Project>
