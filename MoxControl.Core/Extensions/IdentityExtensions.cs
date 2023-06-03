@@ -44,7 +44,9 @@ namespace YATM.Core.Extensions
                 .AddSignInManager<BaseSignInManager<TUser>>()
                 .AddRoleManager<BaseRoleManager<TUser, TRole>>();
 
-            config.AddDefaultUI().AddDefaultTokenProviders();
+            config
+                //.AddDefaultUI()
+                .AddDefaultTokenProviders();
         }
 
         public static void ProcessAnnotationAttributes(this ModelBuilder builder, DbContext context)

@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33627.172
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YATM", "YATM\YATM.csproj", "{8B06F7E8-AD45-45A2-9AFB-1240C910D895}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YATM", "YATM\YATM.csproj", "{8B06F7E8-AD45-45A2-9AFB-1240C910D895}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YATM.Core", "MoxControl.Core\YATM.Core.csproj", "{2450B5EC-D4DB-4A0C-8FC0-7ACA486068A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YATM.Models", "YATM.Models\YATM.Models.csproj", "{BEC5FF40-2441-4104-A0BB-9AE08338CED2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YATM.Models", "YATM.Models\YATM.Models.csproj", "{BEC5FF40-2441-4104-A0BB-9AE08338CED2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YATM.Data", "YATM.Data\YATM.Data.csproj", "{1C24C4C1-B7DC-4D0C-A9A0-4E17A4ABE141}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YATM.Data", "YATM.Data\YATM.Data.csproj", "{1C24C4C1-B7DC-4D0C-A9A0-4E17A4ABE141}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

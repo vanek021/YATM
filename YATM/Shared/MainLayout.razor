@@ -1,5 +1,8 @@
 ﻿@inherits LayoutComponentBase
 
+@inject AuthenticationStateProvider authenticationStateProvider
+@inject NavigationManager navManager
+
 <PageTitle>YATM</PageTitle>
 
 <div class="page">
@@ -17,3 +20,15 @@
         </article>
     </main>
 </div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity is null || !user.Identity.IsAuthenticated)
+            navManager.NavigateTo("/Identity/Account/Login");
+        await base.OnInitializedAsync();
+    }
+}
