@@ -38,7 +38,8 @@ builder.Services.AddAntDesign();
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<WeatherForecastService>();
+
+
 
 builder.Services.AddScoped<IAuthenticationStateAccessor, AuthenticationStateAccessor>();
 builder.Services.AddScoped<ApplicationContext>();
