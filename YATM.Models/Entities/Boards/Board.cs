@@ -9,5 +9,9 @@ namespace YATM.Models.Entities.Boards
 {
     public class Board : BaseRecord
     {
+        public string Name { get; set; }
+        public string? Description { get; set; }
+
+        public virtual List<BoardColumn> Columns { get; set; } = new();
     }
 }

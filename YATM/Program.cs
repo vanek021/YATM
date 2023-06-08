@@ -39,7 +39,7 @@ builder.Services.AddAntDesign();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
-
+builder.Services.AddScoped<BoardService>();
 
 builder.Services.AddScoped<IAuthenticationStateAccessor, AuthenticationStateAccessor>();
 builder.Services.AddScoped<ApplicationContext>();
@@ -78,5 +78,6 @@ app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
 UserSeeds.Initialize(app.Services);
+BoardSeeds.Equal
 
 app.Run();

@@ -2,6 +2,7 @@
 using YATM.Core.Data;
 using YATM.Core.Models;
 using YATM.Models.Entities;
+using YATM.Models.Entities.Boards;
 
 namespace YATM.Data
 {
@@ -9,6 +10,7 @@ namespace YATM.Data
     {
         public AppDbContext(DbContextOptions options) : base(options)
         {
+
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -17,5 +19,9 @@ namespace YATM.Data
 
             base.OnModelCreating(builder);
         }
+
+        public DbSet<Board> Boards { get; set; }
+        public DbSet<BoardColumn> BoardColumns { get; set; }
+        public DbSet<BoardTask> BoardTasks { get; set; }
     }
 }

@@ -30,7 +30,7 @@ namespace YATM.Core.Extensions
         public static IServiceCollection AddBasePgsqlContext<TContext>(this IServiceCollection services, string connectionString)
             where TContext : DbContext
         {
-            services.AddBaseDbContext<TContext>(options => options.UseNpgsql(connectionString));
+            services.AddBaseDbContext<TContext>(options => options.UseNpgsql(connectionString, o => o.UseNetTopologySuite()));
             return services;
         }
 

@@ -5,7 +5,20 @@
 
 <PageTitle>YATM</PageTitle>
 
-@Body
+<Layout Class="layout">
+    <Header>
+        <div class="logo" />
+        <Menu Theme="MenuTheme.Dark" Mode="MenuMode.Horizontal" DefaultSelectedKeys=@(new[]{"2"})>
+            <MenuItem Key="1">nav 1</MenuItem>
+            <MenuItem Key="2">nav 2</MenuItem>
+            <MenuItem Key="3">nav 3</MenuItem>
+        </Menu>
+    </Header>
+    <Content>
+        <div class="site-layout-content">@Body</div>
+    </Content>
+    <Footer Style="text-align: center; color: white; background-color: #001529;">YATM - Yet Another Task Manager - Еще один менеджер задач!</Footer>
+</Layout>
 
 @code {
     protected override async Task OnInitializedAsync()
