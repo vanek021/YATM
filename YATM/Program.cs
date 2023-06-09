@@ -78,6 +78,6 @@ app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
 UserSeeds.Initialize(app.Services);
-BoardSeeds.Equal
+BoardSeeds.Initialize(app.Services);
 
 app.Run();
