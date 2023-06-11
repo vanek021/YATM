@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YATM.Models.Constants;
 using YATM.Models.Entities.Boards;
 
 namespace YATM.Data.Seeds
@@ -12,7 +13,7 @@ namespace YATM.Data.Seeds
     {
         private static readonly Board MainBoard = new()
         {
-            Name = "Основная доска",
+            Name = BoardConstants.MainBoard,
             Description = "Автоматически создаваемая доска",
             Columns = new()
             {

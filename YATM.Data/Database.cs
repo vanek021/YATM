@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using YATM.Core.Attributes;
 using YATM.Core.Repositories;
+using YATM.Data.Repositories;
 
 namespace YATM.Data
 {
@@ -9,9 +10,11 @@ namespace YATM.Data
     [Injectable, Injectable(typeof(IDatabase))]
     public class Database : AbstractDatabase
     {
-        public Database(DbContext context) : base(context)
+        public Database(DbContext context, BoardRepository boardRepo) : base(context)
         {
-
+            Boards = boardRepo;
         }
+
+        public BoardRepository Boards { get; private set; }
     }
 }

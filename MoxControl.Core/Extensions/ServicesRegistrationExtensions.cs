@@ -50,7 +50,7 @@ namespace YATM.Core.Extensions
             var assemblies = assemblyMarkerTypes.Select(x => x.Assembly);
             foreach (var asm in assemblies)
             {
-                var all = asm.GetTypes().Where(x => x.CustomAttributes.Any(it => it.AttributeType.FullName == "MoxControl.Core.Attributes.InjectableAttribute"));
+                var all = asm.GetTypes().Where(x => x.CustomAttributes.Any(it => it.AttributeType.FullName == "YATM.Core.Attributes.InjectableAttribute"));
                 foreach (var it in all)
                     RegisterInjectableType(services, it);
             }
