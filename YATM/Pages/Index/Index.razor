@@ -1,5 +1,4 @@
 ﻿@page "/"
-@page "/{Id:long}"
 
 @using YATM.BlazorModels.Boards;
 @using YATM.Factories;
@@ -20,9 +19,6 @@
 }
 
 @code {
-    [Parameter]
-    public long? Id { get; set; }
-
     public List<BoardBlazorModel> Boards { get; set; } = new();
     public BoardBlazorModel? ActiveBoard { get; set; }
 
@@ -32,11 +28,7 @@
         var boardService = db.GetService<BoardService>();
 
         Boards = await boardService.GetBoardBlazorModelsAsync();
-
-        if (Id.HasValue)
-            ActiveBoard = await boardService.GetBoardBlazorModelByIdAsync(Id.Value);
-        else
-            ActiveBoard = await boardService.GetBoardBlazorModelByNameAsync(BoardConstants.MainBoard);
+        ActiveBoard = await boardService.GetBoardBlazorModelByNameAsync(BoardConstants.MainBoard);
 
         await base.OnInitializedAsync();
     }
