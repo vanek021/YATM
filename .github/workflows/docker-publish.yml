@@ -104,7 +104,7 @@ jobs:
             username: ${{ secrets.USERNAME }}
             password: ${{ secrets.PASSWORD }}
             script: | 
-              docker stop moxcontrol
-              docker rm moxcontrol
+              docker stop yatm
+              docker rm yatm
               docker pull ghcr.io/vanek021/yatm:master
-              docker run --name moxcontrol -p 6000:80 -p 6001:443 --restart=always --detach ghcr.io/vanek021/yatm:master
+              docker run --name yatm -p 6000:80 -p 6001:443 --restart=always --detach ghcr.io/vanek021/yatm:master
