@@ -15,12 +15,12 @@ namespace YATM.Services
             _mapper = mapper;
         }
 
-        public async Task<BoardBlazorModel?> GetBoardBlazorModelByNameAsync(string boardName)
+        public async Task<BoardBlazorModel> GetBoardBlazorModelByNameAsync(string boardName)
         {
             var board = await _db.Boards.GetBoardByName(boardName);
 
             if (board == null)
-                return null;
+                return new();
 
             var boardBlazorModel = _mapper.Map<BoardBlazorModel>(board);
 
@@ -32,7 +32,7 @@ namespace YATM.Services
             var board = await _db.Boards.GetByIdAsync(id);
 
             if (board == null)
-                return null;
+                return new();
 
             var boardBlazorModel = _mapper.Map<BoardBlazorModel>(board);
 

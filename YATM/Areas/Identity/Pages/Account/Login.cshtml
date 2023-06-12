@@ -2,11 +2,11 @@
 
 @model YATM.Areas.Identity.Pages.Account.LoginModel
 
-<section class="vh-100">
+<section class="vh-100" style="background-color: #001529;">
     <div class="container py-5 h-100">
         <div class="row d-flex justify-content-center align-items-center h-100">
             <div class="col-12 col-md-8 col-lg-6 col-xl-5">
-                <div class="card" style="border-radius: 1rem;">
+                <div class="card" style="border-radius: 5px;">
                     <div class="card-body p-5">
                         <h3 class="mb-5">Ты кто такой?</h3>
                         <form method="post">
@@ -22,7 +22,7 @@
                                 <input asp-for="Input.RememberMe" class="form-check-input" />
                                 <label asp-for="Input.RememberMe" class="form-check-label"></label>
                             </div>
-                            <button type="submit" class="btn btn-primary">Войти</button>
+                            <button type="submit" class="btn btn-outline-primary" style="border-radius: 0px;">Войти</button>
                         </form>
                     </div>
                 </div>
@@ -30,3 +30,9 @@
         </div>
     </div>
 </section>
+
+@section Styles {
+    <style>
+
+    </style>
+}

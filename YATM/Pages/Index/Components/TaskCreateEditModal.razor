@@ -1,0 +1,27 @@
+﻿@using YATM.BlazorModels.Boards;
+@using YATM.Factories;
+
+@inject DatabaseFactory dbFactory
+
+<Modal>
+
+</Modal>
+
+@code {
+    public BoardTaskBlazorModel? Task { get; set; }
+
+    public void OpenModal()
+    {
+
+    }
+
+    public void OpenModal(long taskId)
+    {
+
+    }
+
+    public void HideModal()
+    {
+        Task = null;
+    }
+}

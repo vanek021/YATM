@@ -9,18 +9,50 @@
 
 @inject DatabaseFactory dbFactory
 
-<PageTitle>Index</PageTitle>
+<PageTitle>@ActiveBoard?.Name</PageTitle>
 
-<h1>Hello, world!</h1>
-
-@foreach (var board in Boards)
+@if (ActiveBoard is null)
 {
-    <h2>@board.Name</h2>
+    <Spin Size="Large" />
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                @foreach (var column in ActiveBoard.Columns)
+                {
+                    <th>@column.Name</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                @foreach (var column in ActiveBoard.Columns)
+                {
+                    <td>
+                        <Button>Новая карточка</Button>
+                    </td>
+                }
+            </tr>
+            <tr>
+                @foreach (var column in ActiveBoard.Columns)
+                {
+                    <td>
+                        @foreach (var task in column.Tasks)
+                        {
+                            <div>@task.Name</div>
+                        }
+                    </td>
+                }
+            </tr>
+        </tbody>
+    </table>
 }
 
 @code {
     public List<BoardBlazorModel> Boards { get; set; } = new();
-    public BoardBlazorModel? ActiveBoard { get; set; }
+    public BoardBlazorModel ActiveBoard { get; set; }
 
     protected override async Task OnInitializedAsync()
     {

@@ -8,10 +8,8 @@
 <Layout Class="layout">
     <Header>
         <div class="logo" />
-        <Menu Theme="MenuTheme.Dark" Mode="MenuMode.Horizontal" DefaultSelectedKeys=@(new[]{"2"})>
-            <MenuItem Key="1">nav 1</MenuItem>
-            <MenuItem Key="2">nav 2</MenuItem>
-            <MenuItem Key="3">nav 3</MenuItem>
+        <Menu Theme="MenuTheme.Dark" Mode="MenuMode.Horizontal" DefaultSelectedKeys=@(new[]{"1"})>
+            <MenuItem Key="1">Доски</MenuItem>
         </Menu>
     </Header>
     <Content>
@@ -19,6 +17,16 @@
     </Content>
     <Footer Style="text-align: center; color: white; background-color: #001529;">YATM - Yet Another Task Manager - Еще один менеджер задач!</Footer>
 </Layout>
+
+<style>
+    .logo {
+        width: 32px;
+        height: 32px;
+        background: url("favicon.png");
+        margin: 16px 24px 16px 0;
+        float: left;
+    }
+</style>
 
 @code {
     protected override async Task OnInitializedAsync()
