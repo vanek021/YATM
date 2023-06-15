@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication;
+п»їusing Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -32,15 +32,15 @@ namespace YATM.Areas.Identity.Pages.Account
         public class InputModel
         {
             [Required]
-            [Display(Name = "Кличка")]
+            [Display(Name = "РљР»РёС‡РєР°")]
             public string UserName { get; set; }
 
             [Required]
-            [Display(Name = "Пароль")]
+            [Display(Name = "РџР°СЂРѕР»СЊ")]
             [DataType(DataType.Password)]
             public string Password { get; set; }
 
-            [Display(Name = "Запомнить ннада?")]
+            [Display(Name = "Р—Р°РїРѕРјРЅРёС‚СЊ РЅРЅР°РґР°?")]
             public bool RememberMe { get; set; }
         }
 
