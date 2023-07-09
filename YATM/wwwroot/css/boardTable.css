@@ -1,0 +1,12 @@
+﻿.board-table {
+
+}
+
+    .board-table td {
+        border-left: 1px solid #f0f0f0;
+    }
+
+.board-table > tbody > tr > td {
+    border-bottom: none !important;
+}
+

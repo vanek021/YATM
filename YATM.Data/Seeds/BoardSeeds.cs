@@ -1,9 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YATM.Models.Constants;
 using YATM.Models.Entities.Boards;
 
@@ -20,17 +15,41 @@ namespace YATM.Data.Seeds
                 new BoardColumn()
                 {
                     Name = "Нужно сделать",
-                    Order = 0
+                    Order = 0,
+                    Tasks = new()
+                    {
+                        new()
+                        {
+                            Name = "Это тестовая задача колонки",
+                            Description = "Тестовая задача, созданная автоматически"
+                        }
+                    }
                 },
                 new BoardColumn()
                 {
                     Name = "В работе",
-                    Order = 1
+                    Order = 1,
+                    Tasks = new()
+                    {
+                        new()
+                        {
+                            Name = "Это тестовая задача колонки",
+                            Description = "Тестовая задача, созданная автоматически"
+                        }
+                    }
                 }, 
                 new BoardColumn()
                 {
                     Name = "Готово",
-                    Order = 2
+                    Order = 2,
+                    Tasks = new()
+                    {
+                        new()
+                        {
+                            Name = "Это тестовая задача колонки",
+                            Description = "Тестовая задача, созданная автоматически"
+                        }
+                    }
                 }
             }
         };

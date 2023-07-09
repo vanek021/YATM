@@ -17,7 +17,29 @@
 }
 else
 {
-    <table class="table">
+    <Table TItem="BoardColumnBlazorModel" DataSource="ActiveBoard.Columns" HidePagination="true" Class="board-table">
+        @foreach (var column in ActiveBoard.Columns)
+        {
+            <Column @bind-Field="column.Tasks" Title="@column.Name">
+                @foreach (var task in column.Tasks) 
+                {
+                    <div class="board-task">
+                        <div class="board-task__title">
+                            <span>@task.Name</span>
+                        </div>
+                        <div class="board-task__desc">
+                            @task.Description
+                        </div>
+                        <div class="board-task__actions">
+                            <span>Удалить</span>
+                            <span>Редактировать</span>
+                        </div>
+                    </div>
+                }
+            </Column>
+        }
+    </Table>
+@*    <table class="table">
         <thead>
             <tr>
                 @foreach (var column in ActiveBoard.Columns)
@@ -47,7 +69,7 @@ else
                 }
             </tr>
         </tbody>
-    </table>
+    </table>*@
 }
 
 @code {
