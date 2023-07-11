@@ -1,27 +1,31 @@
 ﻿@using YATM.BlazorModels.Boards;
-@using YATM.Factories;
 
 @inject DatabaseFactory dbFactory
 
-<Modal>
+<Modal Visible="visible" Closable="false" Centered="true" OnOk="OnOK" OnCancel="OnCancel" Title="@Task.Name">
 
 </Modal>
 
 @code {
+    [Parameter]
     public BoardTaskBlazorModel? Task { get; set; }
+
+    private bool visible = false;
 
     public void OpenModal()
     {
+        visible = true;
 
+        StateHasChanged();
     }
 
-    public void OpenModal(long taskId)
+    private void OnOK()
     {
-
+        visible = false;
     }
 
-    public void HideModal()
+    private void OnCancel()
     {
-        Task = null;
+        visible = false;
     }
 }

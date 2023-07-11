@@ -1,8 +1,9 @@
 ﻿@page "/"
+@page "/{BoardName}"
 
 @using YATM.BlazorModels.Boards;
-@using YATM.Factories;
 @using YATM.Models.Constants;
+@using YATM.Pages.Index.Components
 @using YATM.Services;
 
 @attribute [Authorize]
@@ -18,72 +19,38 @@
 else
 {
     <Table TItem="BoardColumnBlazorModel" DataSource="ActiveBoard.Columns" HidePagination="true" Class="board-table">
-        @foreach (var column in ActiveBoard.Columns)
-        {
-            <Column @bind-Field="column.Tasks" Title="@column.Name">
-                @foreach (var task in column.Tasks) 
+@*        @foreach (var column in ActiveBoard.Columns)
+        {*@
+            <Column @bind-Field="Ac.Tasks" Title="@column.Name">
+                @*@foreach (var task in column.Tasks) 
                 {
-                    <div class="board-task">
-                        <div class="board-task__title">
-                            <span>@task.Name</span>
-                        </div>
-                        <div class="board-task__desc">
-                            @task.Description
-                        </div>
-                        <div class="board-task__actions">
-                            <span>Удалить</span>
-                            <span>Редактировать</span>
-                        </div>
-                    </div>
-                }
+                    <TaskTableItem Task="task" ItemChangedCallback="GetItemsAsync" />
+                }*@
             </Column>
-        }
+@*        }*@
     </Table>
-@*    <table class="table">
-        <thead>
-            <tr>
-                @foreach (var column in ActiveBoard.Columns)
-                {
-                    <th>@column.Name</th>
-                }
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                @foreach (var column in ActiveBoard.Columns)
-                {
-                    <td>
-                        <Button>Новая карточка</Button>
-                    </td>
-                }
-            </tr>
-            <tr>
-                @foreach (var column in ActiveBoard.Columns)
-                {
-                    <td>
-                        @foreach (var task in column.Tasks)
-                        {
-                            <div>@task.Name</div>
-                        }
-                    </td>
-                }
-            </tr>
-        </tbody>
-    </table>*@
 }
 
 @code {
+    [Parameter]
+    public string? BoardName { get; set; }
+
     public List<BoardBlazorModel> Boards { get; set; } = new();
     public BoardBlazorModel ActiveBoard { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
+        await GetItemsAsync();
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task GetItemsAsync()
+    {
         using var db = dbFactory.Create();
         var boardService = db.GetService<BoardService>();
 
         Boards = await boardService.GetBoardBlazorModelsAsync();
-        ActiveBoard = await boardService.GetBoardBlazorModelByNameAsync(BoardConstants.MainBoard);
-
-        await base.OnInitializedAsync();
+        ActiveBoard = await boardService.GetBoardBlazorModelByNameAsync(BoardName ?? BoardConstants.MainBoard);
     }
 }

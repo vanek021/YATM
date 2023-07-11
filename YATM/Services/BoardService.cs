@@ -45,5 +45,16 @@ namespace YATM.Services
 
             return _mapper.Map<List<BoardBlazorModel>>(boards);
         }
+
+        public async Task DeleteTaskAsync(long taskId)
+        {
+            var task = await _db.BoardTasks.GetByIdAsync(taskId);
+
+            if (task is null)
+                return;
+
+            _db.BoardTasks.Delete(task);
+            await _db.SaveChangesAsync();
+        }
     }
 }
