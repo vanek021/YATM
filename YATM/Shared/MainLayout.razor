@@ -5,17 +5,18 @@
 
 <PageTitle>YATM</PageTitle>
 
-<Layout Class="layout">
+<Layout>
     <Header>
         <div class="logo" />
         <Menu Theme="MenuTheme.Dark" Mode="MenuMode.Horizontal" DefaultSelectedKeys=@(new[]{"1"})>
-            <MenuItem Key="1">Доски</MenuItem>
+            <MenuItem Key="1" RouterLink="/">Доски</MenuItem>
+            <MenuItem Key="2" RouterLink="/notes">Заметки</MenuItem>
         </Menu>
     </Header>
-    <Content>
+    <Content Class="content" Style="overflow: auto;">
         <div class="site-layout-content">@Body</div>
     </Content>
-    <Footer Style="text-align: center; color: white; background-color: #001529;">YATM - Yet Another Task Manager - Еще один менеджер задач!</Footer>
+    <Footer Class="footer">YATM - Yet Another Task Manager - Еще один менеджер задач!</Footer>
 </Layout>
 
 <style>

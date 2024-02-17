@@ -1,0 +1,83 @@
+﻿@page "/notes"
+
+@using YATM.BlazorModels.Notes;
+@using YATM.Models.Constants;
+@using YATM.Pages.Index.Components
+@using YATM.Pages.Notes.Components;
+@using YATM.Services;
+
+@attribute [Authorize]
+
+@inject DatabaseFactory dbFactory
+
+<PageTitle>Заметки</PageTitle>
+
+<NoteCreateEditModal @ref="noteCreateEditModal" Note="noteCreateEdit" OKCallback="OnModalConfirmAsync" />
+<Flex Style="padding-bottom: 10px;">
+    <div>
+        <Button OnClick="OnCreateClickAsync" Icon="@IconType.Outline.Plus">
+            Создать
+        </Button>
+    </div>
+</Flex>
+<Flex Justify="space-around" Wrap="wrap">
+    @foreach (var note in Notes)
+    {
+        <Card Title="@note.Title" Style="width:300px; margin:10px;">
+            <Extra>
+                <a @onclick=@(_ => OnEditClickAsync(note.Id))>Edit</a>
+            </Extra>
+            <Body>
+                Контент скрыт
+                @*@((MarkupString)note.Content)*@
+            </Body>
+        </Card>
+    }
+</Flex>
+
+@code {
+    public List<NoteBlazorModel> Notes { get; set; } = new();
+
+    private NoteBlazorModel noteCreateEdit;
+    private NoteCreateEditModal noteCreateEditModal;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetItemsAsync();
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task GetItemsAsync()
+    {
+        using var db = dbFactory.Create();
+        var noteService = db.GetService<NoteService>();
+        var appCtx = db.GetService<ApplicationContext>();
+        Notes = await noteService.GetNoteBlazorModelsByUserAsync(appCtx.CurrentUser);
+    }
+
+    private async Task OnCreateClickAsync()
+    {
+        noteCreateEdit = new();
+        noteCreateEditModal.OpenModal();
+    }
+
+    private async Task OnEditClickAsync(long id)
+    {
+        noteCreateEdit = Notes.First(n => n.Id == id);
+        noteCreateEditModal.OpenModal();
+    }
+
+    private async Task OnModalConfirmAsync()
+    {
+        using var db = dbFactory.Create();
+        var noteService = db.GetService<NoteService>();
+
+        if (noteCreateEdit.Id == default)
+            await noteService.CreateNoteAsync(noteCreateEdit);
+        else
+            await noteService.UpdateNoteAsync(noteCreateEdit);
+
+        await GetItemsAsync();
+    }
+}

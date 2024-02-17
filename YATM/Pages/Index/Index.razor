@@ -18,17 +18,17 @@
 }
 else
 {
-    <Table TItem="BoardColumnBlazorModel" DataSource="ActiveBoard.Columns" HidePagination="true" Class="board-table">
-@*        @foreach (var column in ActiveBoard.Columns)
-        {*@
+@*    <Table TItem="BoardColumnBlazorModel" DataSource="ActiveBoard.Columns" HidePagination="true" Class="board-table">
+        @foreach (var column in ActiveBoard.Columns)
+        {
             <Column @bind-Field="Ac.Tasks" Title="@column.Name">
-                @*@foreach (var task in column.Tasks) 
+                @foreach (var task in column.Tasks) 
                 {
                     <TaskTableItem Task="task" ItemChangedCallback="GetItemsAsync" />
-                }*@
+                }
             </Column>
-@*        }*@
-    </Table>
+        }
+    </Table>*@
 }
 
 @code {

@@ -1,0 +1,51 @@
+﻿@using YATM.BlazorModels.Notes;
+
+@inject DatabaseFactory dbFactory
+
+<Modal Visible="visible" Closable="false" Centered="true" OnOk="OnOK" OnCancel="OnCancel" Title="@Note?.Title">
+    <Form Model="Note" @ref="form">
+        <FormItem>
+            <Input Placeholder="Заголовок" @bind-Value="@Note!.Title" />
+        </FormItem>
+        <FormItem>
+            <TinyMCE.Blazor.Editor ApiKey="8x4if75v87gl8oelediq72dnb2yomjxelaonbn6p2nyictgk"
+                                   Field="() => Note!.Content"
+                                   @bind-Value="Note!.Content" />
+        </FormItem>
+    </Form>
+</Modal>
+
+@code {
+    [Parameter]
+    public NoteBlazorModel? Note { get; set; } = new();
+
+    [Parameter]
+    public EventCallback OKCallback { get; set; }
+
+
+    private Form<NoteBlazorModel> form;
+
+    private bool visible = false;
+
+    public void OpenModal()
+    {
+        visible = true;
+
+        StateHasChanged();
+    }
+
+    private void OnOK()
+    {
+        var isValid = form.Validate();
+        if (isValid)
+        {
+            OKCallback.InvokeAsync();
+            visible = false;
+        }
+    }
+
+    private void OnCancel()
+    {
+        visible = false;
+    }
+}
