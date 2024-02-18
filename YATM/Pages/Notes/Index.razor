@@ -27,7 +27,7 @@
 <Flex Justify="space-evenly" Wrap="wrap">
     @foreach (var note in Notes)
     {
-        <div style="width: 400px; margin:10px;">
+        <div style="width: 400px; max-width: 400px; margin:10px;">
             <Card Title="@note.Title" Style="border: 1px solid #D2D3D5;">
                 <Extra>
                     <Button Icon="@IconType.Outline.Delete" @onclick=@(_ => OnShowDeleteConfirmation(note)) />
