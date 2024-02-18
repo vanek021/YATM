@@ -1,8 +1,9 @@
 ﻿@page "/notes"
 
 @using YATM.BlazorModels.Notes;
+@using YATM.Components.Shared;
 @using YATM.Models.Constants;
-@using YATM.Pages.Index.Components
+@using YATM.Pages.Index.Components;
 @using YATM.Pages.Notes.Components;
 @using YATM.Services;
 
@@ -13,6 +14,9 @@
 <PageTitle>Заметки</PageTitle>
 
 <NoteCreateEditModal @ref="noteCreateEditModal" Note="noteCreateEdit" OKCallback="OnModalConfirmAsync" />
+<ConfirmationModal @ref="deleteConfirmation" OnCancel="CancelDeleting" OnConfirm="@(_ => OnDeleteConfirmedAsync(deleteDraft!.Id))">
+    <div>Удалить заметку "@deleteDraft?.Title"?</div>
+</ConfirmationModal>
 <Flex Style="padding-bottom: 10px;">
     <div>
         <Button OnClick="OnCreateClickAsync" Icon="@IconType.Outline.Plus">
@@ -20,18 +24,32 @@
         </Button>
     </div>
 </Flex>
-<Flex Justify="space-around" Wrap="wrap">
+<Flex Justify="space-evenly" Wrap="wrap">
     @foreach (var note in Notes)
     {
-        <Card Title="@note.Title" Style="width:300px; margin:10px;">
-            <Extra>
-                <a @onclick=@(_ => OnEditClickAsync(note.Id))>Edit</a>
-            </Extra>
-            <Body>
-                Контент скрыт
-                @*@((MarkupString)note.Content)*@
-            </Body>
-        </Card>
+        <div style="width: 400px; min-height: 300px; margin:10px;">
+            <Card Title="@note.Title">
+                <Extra>
+                    <Button Icon="@IconType.Outline.Delete" @onclick=@(_ => OnShowDeleteConfirmation(note)) />
+                    <Button Icon="@IconType.Outline.Edit" @onclick=@(_ => OnEditClickAsync(note.Id)) />
+                    @if (note.IsPinned)
+                    {
+                        <Button Class="ant-btn-icon-only anticon anticon-edit" @onclick=@(_ => OnPinClickAsync(note)) NoSpanWrap>
+                        <Icon Type="pushpin" Theme="fill" />
+                    </Button>
+                    }
+                    else
+                    {
+                        <Button Class="ant-btn-icon-only" @onclick=@(_ => OnPinClickAsync(note)) NoSpanWrap>
+                        <Icon Type="pushpin" Theme="outline" Class="anticon anticon-pushpin" />
+                    </Button>
+                    }
+                </Extra>
+                <Body>
+                    @((MarkupString)note.Content)
+                </Body>
+            </Card>
+        </div>
     }
 </Flex>
 
@@ -39,13 +57,21 @@
     public List<NoteBlazorModel> Notes { get; set; } = new();
 
     private NoteBlazorModel noteCreateEdit;
+    private NoteBlazorModel? deleteDraft;
     private NoteCreateEditModal noteCreateEditModal;
+    private ConfirmationModal? deleteConfirmation;
 
     protected override async Task OnInitializedAsync()
     {
         await GetItemsAsync();
 
         await base.OnInitializedAsync();
+    }
+
+    private void CancelDeleting()
+    {
+        deleteConfirmation?.Hide();
+        deleteDraft = null;
     }
 
     private async Task GetItemsAsync()
@@ -68,6 +94,39 @@
         noteCreateEditModal.OpenModal();
     }
 
+    private async Task OnPinClickAsync(NoteBlazorModel model)
+    {
+        model.IsPinned = !model.IsPinned;
+
+        using var db = dbFactory.Create();
+        var noteService = db.GetService<NoteService>();
+        await noteService.PinNoteAsync(model);
+
+        await GetItemsAsync();
+        StateHasChanged();
+    }
+
+    private void OnShowDeleteConfirmation(NoteBlazorModel model)
+    {
+        deleteDraft = model;
+        deleteConfirmation?.Show();
+    }
+
+    private async Task OnDeleteConfirmedAsync(long id)
+    {
+        deleteConfirmation?.Hide();
+
+        if (deleteDraft == null)
+            return;
+
+        using var db = dbFactory.Create();
+        var noteService = db.GetService<NoteService>();
+        await noteService.DeleteNoteAsync(id);
+
+        await GetItemsAsync();
+        StateHasChanged();
+    }
+
     private async Task OnModalConfirmAsync()
     {
         using var db = dbFactory.Create();
@@ -79,5 +138,6 @@
             await noteService.UpdateNoteAsync(noteCreateEdit);
 
         await GetItemsAsync();
+        StateHasChanged();
     }
 }

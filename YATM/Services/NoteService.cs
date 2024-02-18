@@ -35,6 +35,20 @@ namespace YATM.Services
             return note;
         }
 
+        public async Task DeleteNoteAsync(long id)
+        {
+            _db.Notes.Delete(id);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task PinNoteAsync(NoteBlazorModel model)
+        {
+            var note = await _db.Notes.GetByIdAsync(model.Id);
+            note.IsPinned = model.IsPinned;
+            _db.Notes.Update(note);
+            await _db.SaveChangesAsync();
+        }
+
         public async Task<Note> UpdateNoteAsync(NoteBlazorModel model)
         {
             if (model.Id == default)

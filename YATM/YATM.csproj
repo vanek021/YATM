@@ -24,7 +24,6 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\lib\" />
-    <Folder Include="Components\" />
   </ItemGroup>
 
 </Project>

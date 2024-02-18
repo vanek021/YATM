@@ -1,0 +1,17 @@
+﻿<Modal Visible="visible" Closable="false" Centered="true" OnOk="OnConfirm" OnCancel="OnCancel" Title="Title">
+    @ChildContent
+</Modal>
+
+@code {
+    bool visible = false;
+    
+    [Parameter] public string Title { get; set; } = "Подтверждение";
+    [Parameter] public RenderFragment ChildContent { get; set; }
+
+    [Parameter] public EventCallback OnConfirm { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    public void Show() => visible = true;
+    public void Hide() => visible = false;
+
+}

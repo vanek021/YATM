@@ -34,6 +34,8 @@ namespace YATM.Data.Repositories
         {
             return ManyWithIncludes()
                 .Where(n => n.UserId == user.Id)
+                .OrderByDescending(n => n.IsPinned)
+                    .ThenBy(n => n.Title)
                 .ToListAsync();
         }
     }

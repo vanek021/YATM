@@ -12,6 +12,7 @@ namespace YATM.Models.Entities.Notes
     {
         public string Title { get; set; }
         public string Content { get; set; }
+        public bool IsPinned { get; set; }
 
         [ForeignKey(nameof(UserId))]
         public User User { get; set; }
