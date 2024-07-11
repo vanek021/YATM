@@ -18,12 +18,21 @@ namespace YATM.Data
         {
             builder.HasPostgresExtension("postgis");
 
+            builder.Entity<Note>()
+                .HasMany(e => e.NoteTags)
+                .WithMany(e => e.Notes)
+                .UsingEntity<NoteNoteTags>();
+
+
             base.OnModelCreating(builder);
         }
 
         public DbSet<Board> Boards { get; set; }
         public DbSet<BoardColumn> BoardColumns { get; set; }
         public DbSet<BoardTask> BoardTasks { get; set; }
+
         public DbSet<Note> Notes { get; set; }
+        public DbSet<NoteTag> NoteTags { get; set; }
+        public DbSet<NoteNoteTags> NoteNoteTags { get; set; }
     }
 }

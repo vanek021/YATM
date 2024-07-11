@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YATM.Core.Models;
+using YATM.Models.Entities.Boards;
 
 namespace YATM.Models.Entities.Notes
 {
@@ -17,5 +18,8 @@ namespace YATM.Models.Entities.Notes
         [ForeignKey(nameof(UserId))]
         public User User { get; set; }
         public long UserId { get; set; }
+
+        public virtual List<NoteTag> NoteTags { get; set; } = new();
+        public virtual List<NoteNoteTags> NoteNoteTags { get; set; } = new();
     }
 }
