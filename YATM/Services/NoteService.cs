@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using YATM.BlazorModels.Notes;
+using YATM.BlazorModels.Notes.NoteTags;
 using YATM.Data;
 using YATM.Models.Entities;
 using YATM.Models.Entities.Notes;
@@ -59,6 +60,18 @@ namespace YATM.Services
             _db.Notes.Update(note);
             await _db.SaveChangesAsync();
             return note;
+        }
+
+        public async Task<List<NoteTagBlazorModel>> GetNoteTags()
+        {
+            var tags = await _db.NoteTags.GetAllAsync();
+            return _mapper.Map<List<NoteTagBlazorModel>>(tags);
+        }
+
+        public async Task<List<NoteTagBlazorModel>> GetNoteTagsWithNotes()
+        {
+            var tags = await _db.NoteTags.GetAllWithNotesAsync();
+            return _mapper.Map<List<NoteTagBlazorModel>>(tags);
         }
     }
 }

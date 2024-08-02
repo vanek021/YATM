@@ -11,6 +11,7 @@ namespace YATM.Models.Entities.Notes
     {
         public string Name { get; set; }
         public string Color { get; set; }
+        public string TextColor { get; set; }
         public int Order { get; set; }
 
         public virtual List<Note> Notes { get; set; } = new();

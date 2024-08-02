@@ -1,6 +1,7 @@
 ﻿@page "/notes"
 
 @using YATM.BlazorModels.Notes;
+@using YATM.BlazorModels.Notes.NoteTags
 @using YATM.Components.Shared;
 @using YATM.Models.Constants;
 @using YATM.Pages.Index.Components;
@@ -23,6 +24,22 @@
             Создать
         </Button>
     </div>
+</Flex>
+<Flex Class="pb-5">
+    <Select Mode="tags"
+            Placeholder="Выберите теги..."
+            @bind-Values="@selectedTagsIds"
+            TItemValue="long"
+            TItem="NoteTagBlazorModel"
+            OnSelectedItemsChanged="OnSelectedTagsChanged"
+            EnableSearch>
+        <SelectOptions>
+            @foreach (var item in NoteTags)
+            {
+                <SelectOption TItemValue="long" TItem="NoteTagBlazorModel" Value=@item.Id Label=@item.Name />
+            }
+        </SelectOptions>
+    </Select>
 </Flex>
 <Flex Justify="space-evenly" Wrap="wrap">
     @foreach (var note in Notes)
@@ -54,15 +71,21 @@
 </Flex>
 
 @code {
-    public List<NoteBlazorModel> Notes { get; set; } = new();
-
+    private List<NoteBlazorModel> Notes { get; set; } = new();
+    private List<NoteTagBlazorModel> NoteTags { get; set; } = new();
     private NoteBlazorModel noteCreateEdit;
     private NoteBlazorModel? deleteDraft;
     private NoteCreateEditModal noteCreateEditModal;
     private ConfirmationModal? deleteConfirmation;
+    private IEnumerable<long> selectedTagsIds;
 
     protected override async Task OnInitializedAsync()
     {
+        using var db = dbFactory.Create();
+        var noteService = db.GetService<NoteService>();
+
+        NoteTags = await noteService.GetNoteTags();
+
         await GetItemsAsync();
 
         await base.OnInitializedAsync();
@@ -139,5 +162,10 @@
 
         await GetItemsAsync();
         StateHasChanged();
+    }
+
+    private void OnSelectedTagsChanged(IEnumerable<NoteTagBlazorModel> values)
+    {
+        
     }
 }

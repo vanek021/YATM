@@ -22,6 +22,11 @@ namespace YATM.Core.Repositories
                 .ToList();
         }
 
+        public virtual List<T> GetAll()
+        {
+            return SingleWithIncludes().ToList();
+        }
+
         public virtual bool Contains(IDKEY id)
         {
             return Table().Any(x => x.Id == id);
@@ -52,6 +57,11 @@ namespace YATM.Core.Repositories
         public virtual Task<bool> ContainsAsync(IDKEY id)
         {
             return Table().AnyAsync(x => x.Id == id);
+        }
+
+        public virtual Task<List<T>> GetAllAsync()
+        {
+            return SingleWithIncludes().ToListAsync();
         }
 
         public virtual Task<bool> ContainsAsync(T entity)

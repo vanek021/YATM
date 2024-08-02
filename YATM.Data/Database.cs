@@ -10,15 +10,17 @@ namespace YATM.Data
     [Injectable, Injectable(typeof(IDatabase))]
     public class Database : AbstractDatabase
     {
-        public Database(DbContext context, BoardRepository boardRepo, BoardTaskRepository boardTaskRepo, NoteRepository noteRepo) : base(context)
+        public Database(DbContext context, BoardRepository boardRepo, BoardTaskRepository boardTaskRepo, NoteRepository noteRepo, NoteTagRepository noteTagRepo) : base(context)
         {
             Boards = boardRepo;
             BoardTasks = boardTaskRepo;
             Notes = noteRepo;
+            NoteTags = noteTagRepo;
         }
 
         public BoardRepository Boards { get; private set; }
         public BoardTaskRepository BoardTasks { get; private set; }
         public NoteRepository Notes { get; private set; }
+        public NoteTagRepository NoteTags { get; private set; }
     }
 }
