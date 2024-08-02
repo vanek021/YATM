@@ -1,0 +1,63 @@
+﻿@page "/health"
+
+@using YATM.BlazorModels.Health
+@using YATM.Components.Shared;
+@using YATM.Models.Constants;
+@using YATM.Services;
+
+@attribute [Authorize]
+
+@inject DatabaseFactory dbFactory
+
+<PageTitle>Здоровье</PageTitle>
+
+@if (_currentRecord.TemperatureRecords.Any())
+{
+    foreach (var tempRecord in _currentRecord.TemperatureRecords)
+    {
+        <div>
+            <div>@tempRecord.TempValue</div>
+            @if (!string.IsNullOrEmpty(tempRecord.Note))
+            {
+                <div>@tempRecord.Note</div>
+            }
+        </div>   
+    }
+}
+
+<EditForm OnValidSubmit="SaveTemperatureRecord">
+    <AntDesign.InputNumber @bind-Value="_newTemperatureRecord.TempValue" />
+    <Input @bind-Value="_newTemperatureRecord.Note" />
+    <Button Type="submit">Сохранить запись</Button>
+</EditForm>
+
+@code {
+    private HealthRecordBlazorModel _currentRecord;
+    private TemperatureRecordBlazorModel _newTemperatureRecord;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetItemsAsync();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task SaveTemperatureRecord()
+    {
+        using var db = dbFactory.Create();
+        var healthService = db.GetService<HealthService>();
+        var appCtx = db.GetService<ApplicationContext>();
+
+        await healthService.SaveTemperatureRecordForAsync(appCtx.CurrentUser, _currentRecord.Id, _newTemperatureRecord);
+        await GetItemsAsync();
+    }
+
+    private async Task GetItemsAsync()
+    {
+        using var db = dbFactory.Create();
+        var healthService = db.GetService<HealthService>();
+        var appCtx = db.GetService<ApplicationContext>();
+
+        _currentRecord = await healthService.GetOrCreateHealthRecordForAsync(appCtx.CurrentUser, DateOnly.FromDateTime(DateTime.UtcNow));
+        _newTemperatureRecord = new();
+    }
+}
