@@ -8,7 +8,9 @@ namespace YATM.BlazorModels.Notes
         public NoteMapping()
         {
             CreateMap<Note, NoteBlazorModel>();
-            CreateMap<NoteBlazorModel, Note>();
+            CreateMap<NoteBlazorModel, Note>()
+                .ForMember(dest => dest.NoteTags, opt => opt.Ignore())
+                .ForMember(dest => dest.NoteNoteTags, opt => opt.Ignore());
         }
     }
 }

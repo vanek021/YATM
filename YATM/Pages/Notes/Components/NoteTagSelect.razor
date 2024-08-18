@@ -1,0 +1,63 @@
+﻿@using YATM.BlazorModels.Notes.NoteTags
+@using YATM.Services
+
+@inject DatabaseFactory dbFactory
+
+<Select Mode="tags"
+        Placeholder="Выберите теги..."
+        @bind-Values="selectedTags"
+        TItem="NoteTagBlazorModel"
+        TItemValue="long"
+        ValueName="@nameof(NoteTagBlazorModel.Id)"
+        LabelName="@nameof(NoteTagBlazorModel.Name)"
+        OnSelectedItemsChanged="OnSelectedItemsChanged"
+        DataSource="noteTags"
+        Style="@Style"
+        IgnoreItemChanges="false"
+        EnableSearch>
+    <ItemTemplate Context="tagCtx">
+        <Tag Color="@tagCtx.Color">@tagCtx.Name</Tag>
+    </ItemTemplate>
+    <LabelTemplate Context="labelCtx">
+        <Tag Closable OnClose="@(_ => RemoveNoteTag(labelCtx))" Color="@labelCtx.Color">@labelCtx.Name</Tag>
+    </LabelTemplate>
+</Select>
+
+@code {
+    [Parameter]
+    public EventCallback<IEnumerable<NoteTagBlazorModel>> OnSelectedItemsChanged { get; set; }
+
+    [Parameter]
+    public string? Style { get; set; }
+
+    private List<NoteTagBlazorModel> noteTags;
+    private IEnumerable<long> selectedTags;
+
+    public List<NoteTagBlazorModel> GetSelected() => noteTags.Where(x => selectedTags != null && selectedTags.Contains(x.Id)).ToList();
+    public List<long> GetSelectedIds() => selectedTags != null ? selectedTags.ToList() : new();
+
+    public async Task InitTagsAsync(IEnumerable<long> tagsIds)
+    {
+        selectedTags = noteTags.Where(n => tagsIds.Contains(n.Id)).Select(n => n.Id).ToList();
+        await Task.Run(async () => await InvokeAsync(StateHasChanged));
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var db = dbFactory.Create();
+        var noteService = db.GetService<NoteService>();
+        noteTags = await noteService.GetNoteTags();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task RemoveNoteTag(NoteTagBlazorModel noteTag)
+    {
+        var oldTags = selectedTags;
+
+        selectedTags = new List<long>();
+        await Task.Run(async () => await InvokeAsync(StateHasChanged));
+
+        selectedTags = oldTags.Where(s => s != noteTag.Id).ToList();
+        await Task.Run(async () => await InvokeAsync(StateHasChanged));
+    }
+}
