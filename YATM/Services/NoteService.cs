@@ -76,9 +76,9 @@ namespace YATM.Services
             return note!;
         }
 
-        public async Task<List<NoteTagBlazorModel>> GetNoteTags()
+        public async Task<List<NoteTagBlazorModel>> GetNoteTags(User user)
         {
-            var tags = await _db.NoteTags.GetAllAsync();
+            var tags = await _db.NoteTags.GetAllAsync(user);
             return _mapper.Map<List<NoteTagBlazorModel>>(tags);
         }
 
@@ -86,6 +86,29 @@ namespace YATM.Services
         {
             var tags = await _db.NoteTags.GetAllWithNotesAsync();
             return _mapper.Map<List<NoteTagBlazorModel>>(tags);
+        }
+
+        public async Task CreateNoteTagAsync(User user, NoteTagBlazorModel model)
+        {
+            var noteTag = _mapper.Map<NoteTag>(model);
+            noteTag.OwnerId = user.Id;
+            _db.NoteTags.Insert(noteTag);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task UpdateNoteTagAsync(User user, NoteTagBlazorModel model)
+        {
+            if (model.Id == default)
+                throw new ArgumentException();
+
+            var noteTag = await _db.NoteTags.GetByIdAsync(model.Id);
+
+            if (noteTag!.OwnerId.HasValue && noteTag.OwnerId.Value != user.Id)
+                throw new Exception();
+
+            _mapper.Map(model, noteTag);
+            _db.NoteTags.Update(noteTag!);
+            await _db.SaveChangesAsync();
         }
     }
 }

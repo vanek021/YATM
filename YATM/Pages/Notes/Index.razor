@@ -32,7 +32,7 @@
 <Flex Justify="space-evenly" Wrap="wrap">
     @foreach (var note in Notes)
     {
-        <div style="width: 380px; min-width: 380px; max-width: 380px; margin:10px;">
+        <div style="width: 380px; margin:10px;">
             <Card>
                 <TitleTemplate>
                     <div>@note.Title</div>
@@ -78,8 +78,9 @@
     {
         using var db = dbFactory.Create();
         var noteService = db.GetService<NoteService>();
+        var appCtx = db.GetService<ApplicationContext>();
 
-        NoteTags = await noteService.GetNoteTags();
+        NoteTags = await noteService.GetNoteTags(appCtx.CurrentUser);
 
         await GetItemsAsync();
 

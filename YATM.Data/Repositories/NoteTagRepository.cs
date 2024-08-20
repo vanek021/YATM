@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using YATM.Core.Attributes;
 using YATM.Core.Repositories;
+using YATM.Models.Entities;
 using YATM.Models.Entities.Notes;
 
 namespace YATM.Data.Repositories
@@ -32,6 +33,18 @@ namespace YATM.Data.Repositories
         {
             return ManyWithIncludes()
                 .ToListAsync();
+        }
+
+        public Task<List<NoteTag>> GetAllAsync(User? user)
+        {
+            var query = SingleWithIncludes();
+
+            if (user is not null)
+            {
+                query = query.Where(n => !n.OwnerId.HasValue || n.OwnerId.Value == user.Id);
+            }
+
+            return query.ToListAsync();
         }
     }
 }

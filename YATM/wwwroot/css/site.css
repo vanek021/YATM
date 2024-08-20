@@ -19,7 +19,7 @@ a, .btn-link {
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 .valid.modified:not([type=checkbox]) {
@@ -66,11 +66,13 @@ a, .btn-link {
 .site-layout-content {
     background: #fff;
     padding: 24px;
+    height: 100%;
+    overflow: auto;
 }
 
 .footer {
-    text-align: center; 
-    color: white; 
+    text-align: center;
+    color: white;
     background-color: #001529;
 }
 
@@ -82,8 +84,54 @@ a, .btn-link {
     float: left;
 }
 
+.notetag__container {
+    border: 1px solid #f0f0f0;
+    width: 100%;
+    padding: 20px;
+}
+
+    .notetag__container:not(:last-child) {
+        margin-bottom: 20px;
+    }
+
+    .notetag__container:hover {
+        background-color: #f0f0f0;
+        cursor: pointer;
+    }
+
+.notetag__label {
+}
+
+.notetag__edit-area {
+    width: 500px;
+    height: 100%;
+    border: 1px solid #f0f0f0;
+    padding: 20px;
+}
+
+.notetag__container-outer {
+    /*    border: 1px solid gray;
+    padding: 30px;*/
+    width: 500px;
+    height: auto;
+    max-height: 80%;
+    overflow: auto;
+}
+
+.notetag__container-inner {
+    /*    border: 1px solid gray;
+    padding: 30px;*/
+    max-height: 800px;
+    overflow: auto;
+}
+
 .notetags__color-small {
     display: inline-block;
     width: 12px;
     height: 12px;
+}
+
+.notetag__container-outer-title {
+    font-size: 18px;
+    padding: 10px;
 }

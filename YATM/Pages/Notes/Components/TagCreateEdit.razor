@@ -1,5 +1,46 @@
-﻿<h3>TagCreateEdit</h3>
+﻿@using YATM.BlazorModels.Notes.NoteTags
+@using YATM.Components.Shared
+@using YATM.Services
+
+@inject DatabaseFactory dbFactory
+
+@if (NoteTag != null)
+{
+    <Form Model="NoteTag" LabelColSpan="8" WrapperColSpan="16">
+        <FormItem Label="Имя">
+            <Input Placeholder="Заголовок" @bind-Value="@NoteTag!.Name" />
+        </FormItem>
+        <FormItem Label="Порядок">
+            <AntDesign.InputNumber PlaceHolder="Порядок вывода" @bind-Value="@NoteTag!.Order" />
+        </FormItem>
+        <ColorPicker Label="Цвет" AntColLabel="8" AntColInput="16" @bind-Value="@NoteTag!.Color" />
+        <ColorPicker Label="Цвет текста" AntColLabel="8" AntColInput="16" @bind-Value="@NoteTag!.TextColor" />
+        <Button OnClick="SaveNoteTagChangesAsync">Сохранить</Button>
+    </Form>
+}
 
 @code {
+    [Parameter]
+    public NoteTagBlazorModel? NoteTag { get; set; }
 
+    [Parameter]
+    public EventCallback OnSave { get; set; }
+
+    public async Task SaveNoteTagChangesAsync()
+    {
+        using var db = dbFactory.Create();
+        var noteService = db.GetService<NoteService>();
+        var appCtx = db.GetService<ApplicationContext>();
+
+        if (NoteTag!.Id == default)
+        {
+            await noteService.CreateNoteTagAsync(appCtx.CurrentUser, NoteTag!);
+        }
+        else
+        {
+            await noteService.UpdateNoteTagAsync(appCtx.CurrentUser, NoteTag!);
+        }
+
+        await OnSave.InvokeAsync();
+    }
 }
