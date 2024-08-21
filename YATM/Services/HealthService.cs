@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using YATM.BlazorModels.Health;
 using YATM.Data;
+using YATM.Infrastructure.Extensions;
 using YATM.Models.Entities;
 using YATM.Models.Entities.Health;
 
@@ -27,7 +28,7 @@ namespace YATM.Services
             var newRecord = new HealthRecord();
 
             newRecord.UserId = user.Id;
-            newRecord.RecordedAt = date.ToDateTime(TimeOnly.MinValue);
+            newRecord.RecordedAt = date.ToDateTime(TimeOnly.MinValue).SetUtcDateTimeKind();
 
             _db.HealthRecords.Insert(newRecord);
             await _db.SaveChangesAsync();

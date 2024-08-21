@@ -81,7 +81,12 @@ namespace YATM.Infrastructure.Extensions
             if (!datetime.HasValue)
                 return null;
 
-            var utcDatetime = new DateTime(datetime.Value.Ticks, DateTimeKind.Utc);
+            return SetUtcDateTimeKind(datetime.Value);
+        }
+
+        public static DateTime SetUtcDateTimeKind(this DateTime datetime)
+        {
+            var utcDatetime = new DateTime(datetime.Ticks, DateTimeKind.Utc);
             return utcDatetime;
         }
     }

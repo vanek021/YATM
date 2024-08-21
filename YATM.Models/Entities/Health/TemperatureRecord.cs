@@ -14,8 +14,9 @@ namespace YATM.Models.Entities.Health
         [ForeignKey(nameof(HealthRecordId))]
         public HealthRecord HealthRecord { get; set; }
         public long HealthRecordId { get; set; }
+
         [Range(30.0, 45.0)]
         public double TempValue { get; set; }
-        public string Note { get; set; }
+        public string? Note { get; set; }
     }
 }

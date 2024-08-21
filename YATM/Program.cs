@@ -43,6 +43,7 @@ builder.Services.AddServerSideBlazor();
 
 builder.Services.AddScoped<BoardService>();
 builder.Services.AddScoped<NoteService>();
+builder.Services.AddScoped<HealthService>();
 
 builder.Services.AddScoped<IAuthenticationStateAccessor, AuthenticationStateAccessor>();
 builder.Services.AddScoped<ApplicationContext>();

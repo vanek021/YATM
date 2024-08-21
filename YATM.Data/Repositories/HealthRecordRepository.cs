@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using YATM.Core.Attributes;
 using YATM.Core.Repositories;
+using YATM.Infrastructure.Extensions;
 using YATM.Models.Entities;
 using YATM.Models.Entities.Health;
 using YATM.Models.Entities.Notes;
@@ -31,23 +32,12 @@ namespace YATM.Data.Repositories
                 .Include(r => r.TemperatureRecords);
         }
 
-        public async Task<HealthRecord> GetForAsync(User user, DateOnly date)
+        public async Task<HealthRecord?> GetForAsync(User user, DateOnly date)
         {
             var fromDb = await ManyWithIncludes()
-                .SingleOrDefaultAsync(r => r.UserId == user.Id && r.RecordedAt.Date == date.ToDateTime(TimeOnly.MinValue));
+                .SingleOrDefaultAsync(r => r.UserId == user.Id && r.RecordedAt.Date == date.ToDateTime(TimeOnly.MinValue).SetUtcDateTimeKind());
 
-            if (fromDb is not null)
-                return fromDb;
-
-            var newRecord = new HealthRecord();
-
-            newRecord.UserId = user.Id;
-            newRecord.RecordedAt = date.ToDateTime(TimeOnly.MinValue);
-
-            Insert(newRecord);
-            await _context.SaveChangesAsync();
-
-            return newRecord;
+            return fromDb;
         }
 
         public async Task<HealthRecord?> GetByIdAsync(User user, long id)

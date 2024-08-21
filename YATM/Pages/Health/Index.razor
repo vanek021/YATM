@@ -11,7 +11,7 @@
 
 <PageTitle>Здоровье</PageTitle>
 
-@if (_currentRecord.TemperatureRecords.Any())
+@if (_currentRecord is not null && _currentRecord.TemperatureRecords.Any())
 {
     foreach (var tempRecord in _currentRecord.TemperatureRecords)
     {
@@ -25,11 +25,14 @@
     }
 }
 
-<EditForm OnValidSubmit="SaveTemperatureRecord">
-    <AntDesign.InputNumber @bind-Value="_newTemperatureRecord.TempValue" />
-    <Input @bind-Value="_newTemperatureRecord.Note" />
-    <Button Type="submit">Сохранить запись</Button>
-</EditForm>
+@if (_newTemperatureRecord is not null)
+{
+    <EditForm OnValidSubmit="SaveTemperatureRecord">
+        <AntDesign.InputNumber @bind-Value="_newTemperatureRecord.TempValue" />
+        <Input @bind-Value="_newTemperatureRecord.Note" />
+        <Button Type="submit">Сохранить запись</Button>
+    </EditForm>
+}
 
 @code {
     private HealthRecordBlazorModel _currentRecord;

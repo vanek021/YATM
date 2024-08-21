@@ -3,6 +3,7 @@ using YATM.Core.Data;
 using YATM.Core.Models;
 using YATM.Models.Entities;
 using YATM.Models.Entities.Boards;
+using YATM.Models.Entities.Health;
 using YATM.Models.Entities.Notes;
 
 namespace YATM.Data
@@ -34,5 +35,8 @@ namespace YATM.Data
         public DbSet<Note> Notes { get; set; }
         public DbSet<NoteTag> NoteTags { get; set; }
         public DbSet<NoteNoteTags> NoteNoteTags { get; set; }
+
+        public DbSet<HealthRecord> HealthRecords { get; set; }
+        public DbSet<TemperatureRecord> TemperatureRecords { get; set; }
     }
 }

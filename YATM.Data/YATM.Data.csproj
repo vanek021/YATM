@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MoxControl.Core\YATM.Core.csproj" />
+    <ProjectReference Include="..\YATM.Infrastructure\YATM.Infrastructure.csproj" />
     <ProjectReference Include="..\YATM.Models\YATM.Models.csproj" />
   </ItemGroup>
 
