@@ -31,7 +31,7 @@ namespace YATM.Data.Repositories
                 .Include(r => r.TemperatureRecords);
         }
 
-        public async Task<HealthRecord> GetOrCreateForAsync(User user, DateOnly date)
+        public async Task<HealthRecord> GetForAsync(User user, DateOnly date)
         {
             var fromDb = await ManyWithIncludes()
                 .SingleOrDefaultAsync(r => r.UserId == user.Id && r.RecordedAt.Date == date.ToDateTime(TimeOnly.MinValue));

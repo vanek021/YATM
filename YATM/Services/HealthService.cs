@@ -19,9 +19,20 @@ namespace YATM.Services
 
         public async Task<HealthRecordBlazorModel> GetOrCreateHealthRecordForAsync(User user, DateOnly date)
         {
-            var record = await _db.HealthRecords.GetOrCreateForAsync(user, date);
+            var fromDb = await _db.HealthRecords.GetForAsync(user, date);
 
-            return _mapper.Map<HealthRecordBlazorModel>(record);
+            if (fromDb is not null)
+                return _mapper.Map<HealthRecordBlazorModel>(fromDb);
+
+            var newRecord = new HealthRecord();
+
+            newRecord.UserId = user.Id;
+            newRecord.RecordedAt = date.ToDateTime(TimeOnly.MinValue);
+
+            _db.HealthRecords.Insert(newRecord);
+            await _db.SaveChangesAsync();
+
+            return _mapper.Map<HealthRecordBlazorModel>(newRecord);
         }
 
         public async Task SaveTemperatureRecordForAsync(User user, long healthRecordId, TemperatureRecordBlazorModel temperatureRecordModel)

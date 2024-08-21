@@ -6,7 +6,7 @@ namespace YATM.Core.Repositories
 {
     public abstract class BaseDbRepository<T> where T : class, IEntity
     {
-        protected DbContext _context;
+        private DbContext _context;
 
         public BaseDbRepository(DbContext context)
         {
