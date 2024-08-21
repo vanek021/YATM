@@ -16,7 +16,9 @@ namespace YATM.Data.Repositories
         }
         protected override IQueryable<Note> SingleWithIncludes()
         {
-            return base.SingleWithIncludes();
+            return base.SingleWithIncludes()
+                .Include(n => n.NoteNoteTags)
+                .Include(n => n.NoteTags);
         }
 
         protected override IQueryable<Note> ManyWithIncludes()
@@ -30,11 +32,15 @@ namespace YATM.Data.Repositories
                 .ToListAsync();
         }
 
-        public Task<List<Note>> GetAllNotesByUser(User user)
+        public Task<List<Note>> GetAllNotesByUser(User user, List<long>? tagIds = null)
         {
-            return ManyWithIncludes()
-                .Where(n => n.UserId == user.Id)
-                .OrderByDescending(n => n.IsPinned)
+            var query = ManyWithIncludes()
+                .Where(n => n.UserId == user.Id);
+
+            if (tagIds != null && tagIds.Any()) 
+                query = query.Where(n => n.NoteTags.Any(t => tagIds.Contains(t.Id)));
+
+            return query.OrderByDescending(n => n.IsPinned)
                     .ThenByDescending(n => n.CreatedAt)
                 .ToListAsync();
         }

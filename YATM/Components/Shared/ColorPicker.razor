@@ -1,0 +1,46 @@
+﻿
+<div class="ant-form-item-row ant-row" style="margin-bottom: 24px;">
+    <div class="ant-form-item-label ant-col @(!string.IsNullOrEmpty(AntColLabel) ? $"ant-col-{AntColLabel}" : "")">
+        <label>@Label</label>
+    </div>
+    <div class="ant-form-item-control ant-col @(!string.IsNullOrEmpty(AntColInput) ? $"ant-col-{AntColInput}" : "")">
+        <input type="color"
+               class="form-control form-control-color"
+               style="border-radius: 0 !important;"
+               @bind-value="Value" />
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public string? AntColLabel { get; set; }
+
+    [Parameter]
+    public string? AntColInput { get; set; }
+
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    [Parameter]
+    public string? Label { get; set; }
+
+    [Parameter]
+    public string? Value
+    {
+        get => _value;
+        set
+        {
+            if (value == _value)
+                return;
+
+            _value = value;
+            if (ValueChanged.HasDelegate)
+            {
+                ValueChanged.InvokeAsync(_value);
+            }
+        }
+    }
+
+    private string? _value;
+}

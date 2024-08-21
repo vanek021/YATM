@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -12,9 +13,11 @@ using YATM.Data;
 namespace YATM.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240722041835_AddSoftDeletedField")]
+    partial class AddSoftDeletedField
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -359,13 +362,6 @@ namespace YATM.Data.Migrations
                     b.Property<int>("Order")
                         .HasColumnType("integer");
 
-                    b.Property<long?>("OwnerId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("TextColor")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -373,8 +369,6 @@ namespace YATM.Data.Migrations
 
                     b.HasIndex("Id")
                         .IsUnique();
-
-                    b.HasIndex("OwnerId");
 
                     b.ToTable("NoteTags");
                 });
@@ -556,15 +550,6 @@ namespace YATM.Data.Migrations
                     b.Navigation("Note");
 
                     b.Navigation("NoteTag");
-                });
-
-            modelBuilder.Entity("YATM.Models.Entities.Notes.NoteTag", b =>
-                {
-                    b.HasOne("YATM.Models.Entities.User", "Owner")
-                        .WithMany()
-                        .HasForeignKey("OwnerId");
-
-                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("YATM.Models.Entities.Boards.Board", b =>

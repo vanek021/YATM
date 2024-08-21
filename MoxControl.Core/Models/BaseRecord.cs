@@ -21,5 +21,9 @@ namespace YATM.Core.Models
         [Display(Name = "Дата изменения")]
         [ScaffoldColumn(false)]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        [Required]
+        [Display(Name = "Выведено из системы")]
+        public bool IsSoftDeleted { get; set; }
     }
 }

@@ -1,4 +1,6 @@
-﻿@using YATM.BlazorModels.Notes;
+﻿@using YATM.BlazorModels.Notes
+@using YATM.BlazorModels.Notes.NoteTags
+@using YATM.Services
 
 @inject DatabaseFactory dbFactory
 
@@ -6,6 +8,9 @@
     <Form Model="Note" @ref="form">
         <FormItem>
             <Input Placeholder="Заголовок" @bind-Value="@Note!.Title" />
+        </FormItem>
+        <FormItem>
+            <NoteTagSelect @ref="noteTagSelect" OnSelectedItemsChanged="OnSelectedTagsChanged" />
         </FormItem>
         <FormItem>
             <TinyMCE.Blazor.Editor ApiKey="8x4if75v87gl8oelediq72dnb2yomjxelaonbn6p2nyictgk"
@@ -22,10 +27,26 @@
     [Parameter]
     public EventCallback OKCallback { get; set; }
 
-
-    private Form<NoteBlazorModel> form;
-
+    private NoteTagSelect? noteTagSelect;
+    private Form<NoteBlazorModel?>? form;
+    private IEnumerable<long>? initTags;
+    private bool needSetTags = false;
     private bool visible = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (needSetTags)
+        {
+            if (noteTagSelect != null)
+            {
+                await noteTagSelect!.InitTagsAsync(initTags!);
+                needSetTags = false;
+                initTags = null;
+            }
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
 
     public void OpenModal()
     {
@@ -34,9 +55,15 @@
         StateHasChanged();
     }
 
+    public void InitTags(IEnumerable<long> tagsIds)
+    {
+        initTags = tagsIds;
+        needSetTags = true;
+    }
+
     private void OnOK()
     {
-        var isValid = form.Validate();
+        var isValid = form!.Validate();
         if (isValid)
         {
             OKCallback.InvokeAsync();
@@ -47,5 +74,17 @@
     private void OnCancel()
     {
         visible = false;
+    }
+
+    private void OnSelectedTagsChanged(IEnumerable<NoteTagBlazorModel> values)
+    {
+        if (values != null && values.Any())
+        {
+            Note!.NoteTags = values.ToList();
+        }
+        else
+        {
+            Note!.NoteTags = new();
+        }
     }
 }

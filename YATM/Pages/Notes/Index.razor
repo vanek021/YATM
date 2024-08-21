@@ -1,6 +1,7 @@
 ﻿@page "/notes"
 
 @using YATM.BlazorModels.Notes;
+@using YATM.BlazorModels.Notes.NoteTags
 @using YATM.Components.Shared;
 @using YATM.Models.Constants;
 @using YATM.Pages.Index.Components;
@@ -23,26 +24,37 @@
             Создать
         </Button>
     </div>
+    <NoteTagSelect @ref="noteTagSelect"
+                   OnSelectedItemsChanged="OnSelectedTagsChanged"
+                   Style="width: 500px; margin-left: 20px;" />
+    <a href="/notes/notetags"><Button><Icon Type="edit" Theme="outline" /></Button></a>
 </Flex>
 <Flex Justify="space-evenly" Wrap="wrap">
     @foreach (var note in Notes)
     {
-        <div style="width: 380px; min-width: 380px; max-width: 380px; margin:10px;">
-            <Card Title="@note.Title" Style="border: 1px solid #D2D3D5;">
+        <div style="width: 380px; margin:10px;">
+            <Card>
+                <TitleTemplate>
+                    <div>@note.Title</div>
+                    @foreach (var tag in note.NoteTags.OrderBy(nt => nt.Order))
+                    {
+                        <Tag Color="@tag.Color">@tag.Name</Tag>
+                    }
+                </TitleTemplate>
                 <Extra>
                     <Button Icon="@IconType.Outline.Delete" @onclick=@(_ => OnShowDeleteConfirmation(note)) />
                     <Button Icon="@IconType.Outline.Edit" @onclick=@(_ => OnEditClickAsync(note.Id)) />
                     @if (note.IsPinned)
                     {
                         <Button Class="ant-btn-icon-only" @onclick=@(_ => OnPinClickAsync(note)) NoSpanWrap>
-                        <Icon Type="pushpin" Theme="fill" />
-                    </Button>
+                            <Icon Type="pushpin" Theme="fill" />
+                        </Button>
                     }
                     else
                     {
                         <Button Class="ant-btn-icon-only" @onclick=@(_ => OnPinClickAsync(note)) NoSpanWrap>
-                        <Icon Type="pushpin" Theme="outline" Class="anticon anticon-pushpin" />
-                    </Button>
+                            <Icon Type="pushpin" Theme="outline" Class="anticon anticon-pushpin" />
+                        </Button>
                     }
                 </Extra>
                 <Body>
@@ -54,15 +66,22 @@
 </Flex>
 
 @code {
-    public List<NoteBlazorModel> Notes { get; set; } = new();
-
-    private NoteBlazorModel noteCreateEdit;
+    private List<NoteBlazorModel> Notes { get; set; } = new();
+    private List<NoteTagBlazorModel> NoteTags { get; set; } = new();
+    private NoteBlazorModel? noteCreateEdit;
     private NoteBlazorModel? deleteDraft;
-    private NoteCreateEditModal noteCreateEditModal;
+    private NoteCreateEditModal? noteCreateEditModal;
     private ConfirmationModal? deleteConfirmation;
+    private NoteTagSelect? noteTagSelect;
 
     protected override async Task OnInitializedAsync()
     {
+        using var db = dbFactory.Create();
+        var noteService = db.GetService<NoteService>();
+        var appCtx = db.GetService<ApplicationContext>();
+
+        NoteTags = await noteService.GetNoteTags(appCtx.CurrentUser);
+
         await GetItemsAsync();
 
         await base.OnInitializedAsync();
@@ -79,18 +98,21 @@
         using var db = dbFactory.Create();
         var noteService = db.GetService<NoteService>();
         var appCtx = db.GetService<ApplicationContext>();
-        Notes = await noteService.GetNoteBlazorModelsByUserAsync(appCtx.CurrentUser);
+        Notes = await noteService.GetNoteBlazorModelsByUserAsync(appCtx.CurrentUser, noteTagSelect?.GetSelectedIds()?.ToList());
+        StateHasChanged();
     }
 
     private async Task OnCreateClickAsync()
     {
         noteCreateEdit = new();
+        noteCreateEditModal!.InitTags(Enumerable.Empty<long>());
         noteCreateEditModal.OpenModal();
     }
 
     private async Task OnEditClickAsync(long id)
     {
         noteCreateEdit = Notes.First(n => n.Id == id);
+        noteCreateEditModal!.InitTags(noteCreateEdit.NoteTags.Select(n => n.Id));
         noteCreateEditModal.OpenModal();
     }
 
@@ -132,11 +154,17 @@
         using var db = dbFactory.Create();
         var noteService = db.GetService<NoteService>();
 
-        if (noteCreateEdit.Id == default)
+        if (noteCreateEdit!.Id == default)
             await noteService.CreateNoteAsync(noteCreateEdit);
         else
             await noteService.UpdateNoteAsync(noteCreateEdit);
 
+        await GetItemsAsync();
+        StateHasChanged();
+    }
+
+    private async Task OnSelectedTagsChanged(IEnumerable<NoteTagBlazorModel> values)
+    {
         await GetItemsAsync();
         StateHasChanged();
     }
