@@ -10,7 +10,7 @@ COPY . .
 RUN find . -name '*.csproj' -exec dotnet restore {} \;
 
 WORKDIR /source/YATM
-RUN dotnet publish YATM/YATM.csproj -c release -o /app --no-restore
+RUN dotnet publish YATM.csproj -c release -o /app --no-restore
 
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:7.0
