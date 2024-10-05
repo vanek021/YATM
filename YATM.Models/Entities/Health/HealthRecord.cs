@@ -15,7 +15,10 @@ namespace YATM.Models.Entities.Health
         public User User { get; set; }
         public long UserId { get; set; }
         public DateTime RecordedAt { get; set; }
-
+        public string? BodyNote { get; set; }
+        public string? TemperatureGeneralNote { get; set; }
+        [Column(TypeName = "jsonb")]
+        public HealthSvgData? HealthSvgData { get; set; }
         public virtual List<TemperatureRecord> TemperatureRecords { get; set; } = new();
     }
 }

@@ -6,14 +6,34 @@
 <PageTitle>YATM</PageTitle>
 
 <Layout>
-    <Header>
-        <div class="logo" />
-        <Menu Theme="MenuTheme.Dark" Mode="MenuMode.Horizontal" DefaultSelectedKeys=@(new[]{"1"})>
-            <MenuItem Key="1" RouterLink="/">Доски</MenuItem>
-            <MenuItem Key="2" RouterLink="/notes">Заметки</MenuItem>
-            <MenuItem Key="3" RouterLink="/health">Здоровье</MenuItem>
-        </Menu>
-    </Header>
+    <header Class="header">
+        <div class="content">
+            <div class="logo" />
+            <div class="header__menu">
+                <div class="navigation @NavMenuCssClass" @onclick="ToggleNavMenu">
+                    <nav class="menu">
+                        <NavLink class="menu__item" href="" Match="NavLinkMatch.All">
+                            Доски
+                        </NavLink>
+                        <NavLink class="menu__item" href="notes">
+                            Заметки
+                        </NavLink>
+                        <NavLink class="menu__item" href="health">
+                            Здоровье
+                        </NavLink>
+                    </nav>
+                </div>
+
+                <div class="hamburger" @onclick="ToggleNavMenu">
+                    <div class="svg-icon icon-hamburger">
+                        <div style="color: white;">
+                            <Icon Width="26px" Height="26px" Type="menu" Theme="outline" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
     <Content Class="content" Style="overflow: auto;">
         <div class="site-layout-content">@Body</div>
     </Content>
@@ -31,6 +51,11 @@
 </style>
 
 @code {
+
+    private bool _collapseNavMenu = true;
+
+    private string? NavMenuCssClass => _collapseNavMenu ? "collapse" : "menu-open";
+
     protected override async Task OnInitializedAsync()
     {
         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
@@ -39,5 +64,10 @@
         if (user.Identity is null || !user.Identity.IsAuthenticated)
             navManager.NavigateTo("/Identity/Account/Login");
         await base.OnInitializedAsync();
+    }
+
+    private void ToggleNavMenu()
+    {
+        _collapseNavMenu = !_collapseNavMenu;
     }
 }

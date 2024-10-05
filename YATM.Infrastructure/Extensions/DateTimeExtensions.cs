@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace YATM.Infrastructure.Extensions
 {
@@ -74,6 +75,11 @@ namespace YATM.Infrastructure.Extensions
         public static string? GetDateWithTime(this DateTime? datetime)
         {
             return datetime?.ToString("g", DateTimeFormatInfo.CurrentInfo);
+        }
+
+        public static string GetDateWithDayAndMonthName(this DateOnly dateOnly)
+        {
+            return dateOnly.ToString("ddd, dd MMM, yyyy", new CultureInfo("ru-RU"));
         }
 
         public static DateTime? SetUtcDateTimeKind(this DateTime? datetime)

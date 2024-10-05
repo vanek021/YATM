@@ -18,5 +18,6 @@ namespace YATM.Models.Entities.Health
         [Range(30.0, 45.0)]
         public double TempValue { get; set; }
         public string? Note { get; set; }
+        public DateTime RecordedAt { get; set; }
     }
 }
