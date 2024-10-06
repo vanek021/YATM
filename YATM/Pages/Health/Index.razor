@@ -66,7 +66,7 @@
                         <div>
                             <AntDesign.InputNumber Min="30" Max="45"
                                                    Style="width: 100%;"
-                                                   CultureInfo="System.Globalization.CultureInfo.InvariantCulture"
+                                                   CultureInfo="@System.Globalization.CultureInfo.GetCultureInfo("ru-RU")"
                                                    @bind-Value="_newTemperatureRecord.TempValue" />
                             <ValidationMessage For="@(() => _newTemperatureRecord.TempValue)" />
                         </div>
