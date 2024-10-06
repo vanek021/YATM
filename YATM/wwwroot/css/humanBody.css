@@ -7,14 +7,6 @@
         cursor: pointer;
     }
 
-    .human-body path:hover:not(.wrapper) {
-        fill: #db8b35;
-    }
-
-    .human-body g:hover {
-        fill: #db8b35;
-    }
-
     .human-body svg {
     }
 
@@ -86,6 +78,16 @@
             margin-left: 5.5px;
             top: 455px;
         }
+
+@media (hover: hover) and (pointer: fine) {
+    .human-body path:hover:active:not(.wrapper) {
+        fill: #db8b35;
+    }
+
+    .human-body g:hover {
+        fill: #db8b35;
+    }
+}
 
 #area {
     display: block;
