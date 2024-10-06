@@ -14,30 +14,29 @@
 <PageTitle>Здоровье</PageTitle>
 
 <div class="row" style="padding-bottom: 10px;">
-    <div class="col-lg-4 col-sm-12 col-md-6">
-        <div class="d-flex gap-1">
-            <Button OnClick="CreateNewTempRecord">Внести температуру</Button>
+    <div class="col-lg-2 col-md-12 col-sm-12 col-12">
+        <div class="d-flex justify-content-center">
             <DatePicker @bind-Value="_currentDate" TValue="DateOnly" OnChange="ChangeDate" Format="MM/dd/yyyy" />
         </div>
     </div>
-    <div class="col-lg-4 col-sm-12 col-md-6">
+    <div class="col-lg-8 col-md-12 col-sm-12 mt-lg-0 mt-md-2 mt-sm-2 mt-2">
         <div class="d-flex justify-content-center gap-1">
             <Button OnClick="ChangeDateToPreviousDay" Icon="@IconType.Outline.Left" />
             <div class="health__date-desc">@_currentDate.GetDateWithDayAndMonthName()</div>
             <Button OnClick="ChangeDateToNextDay" Icon="@IconType.Outline.Right" />
         </div>
     </div>
-    <div class="col-lg-4 col-sm-12"></div>
+    <div class="col-lg-2 col-md-0 col-sm-12 col-12"></div>
 </div>
 
 @if (_currentRecord is not null)
 {
     <div class="row">
-        <div class="col-lg-6 col-sm-12">
-            <HumanBody OnDataPositionsChanged="SaveHealthSvgData"
-                       DataPositions="_selectedDataPositions" />
+        <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+            <FullHumanBody DataPositions="_selectedDataPositions"
+                           OnDataPositionsChanged="SaveHealthSvgData" />
         </div>
-        <div class="col-lg-6 col-sm-12">
+        <div class="col-lg-6 col-md-6 col-sm-12 col-12 mt-lg-0 mt-md-0 mt-sm-4 mt-4">
             <div style="height: 100%; width: 100%;">
                 <TextArea DebounceMilliseconds="1000"
                           Style="height: 100%; width: 100%;"
@@ -67,6 +66,7 @@
                         <div>
                             <AntDesign.InputNumber Min="30" Max="45"
                                                    Style="width: 100%;"
+                                                   CultureInfo="System.Globalization.CultureInfo.CurrentCulture"
                                                    @bind-Value="_newTemperatureRecord.TempValue" />
                             <ValidationMessage For="@(() => _newTemperatureRecord.TempValue)" />
                         </div>
@@ -77,9 +77,13 @@
                                         @bind-Value="_newTemperatureRecord.RecordedAt" />
                             <ValidationMessage For="@(() => _newTemperatureRecord.RecordedAt)" />
                         </div>
-                        <div>
-                            <Button HtmlType="submit">Сохранить</Button>
-                            <Button OnClick="CancelCreateNewTempRecord" Type="button">Отменить</Button>
+                        <div class="d-flex flex-wrap">
+                            <div class="">
+                                <Button HtmlType="submit" Icon="@IconType.Outline.Check" />
+                            </div>
+                            <div class="">
+                                <Button OnClick="CancelCreateNewTempRecord" Type="button" Icon="@IconType.Outline.Close" />
+                            </div>
                         </div>
                     </EditForm>
                 </div>
@@ -93,6 +97,11 @@
                           Style="height: 100%; border: none;"
                           @bind-Value="_currentRecord!.TemperatureGeneralNote" />
             </div>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col">
+            <Button OnClick="CreateNewTempRecord">Внести температуру</Button>
         </div>
     </div>
 }

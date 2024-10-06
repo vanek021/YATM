@@ -1,24 +1,21 @@
 ﻿.human-body {
-    width: 207px;
-    position: relative;
-    padding-top: 240px;
-    height: 260px;
-    display: block;
-    margin: 40px auto;
+    display: flex;
+    justify-content: center;
 }
 
     .human-body svg:hover {
         cursor: pointer;
     }
 
-        .human-body svg:hover path {
-            fill: #ff7d16;
-        }
+    .human-body path:hover:not(.wrapper) {
+        fill: #db8b35;
+    }
+
+    .human-body g:hover {
+        fill: #db8b35;
+    }
 
     .human-body svg {
-        position: absolute;
-        left: 50%;
-        fill: #57c9d5;
     }
 
         .human-body svg#head {
@@ -106,5 +103,5 @@
     }
 
 .human-body .part__selected {
-    fill: #ff7d16 !important;
+    fill: #db8b35 !important;
 }
