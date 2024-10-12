@@ -2,6 +2,7 @@
 @page "/{BoardName}"
 
 @using YATM.BlazorModels.Boards;
+@using YATM.Infrastructure.Extensions
 @using YATM.Models.Constants;
 @using YATM.Pages.Index.Components
 @using YATM.Services;
@@ -42,7 +43,7 @@ else
             <tr>
                 @foreach (var col in _activeBoard.Columns)
                 {
-                    <th scope="col">@col.Name</th>
+                    <th scope="col">@col.Name @(col.Tasks.Any() ? $"({col.Tasks.Count})" : "")</th>
                 }
             </tr>
         </thead>
@@ -57,8 +58,16 @@ else
                                 <div class="board-task__name" @ondblclick="@(_ => OpenTaskEditModal(task))">
                                     <span class="board-task__task-id">@_activeBoard.Code-@task.Id</span> @task.Name
                                 </div>
-                                <div class="board-task__avatar">
-                                    <YATM.Components.Shared.Avatar User="task.User" />
+                                <div class="d-flex justify-content-between">
+                                    <div class="board-task__expire-date">
+                                        @if (task.ExpireDate is not null)
+                                        {
+                                            <div>@task.ExpireDate.GetDateOnly()</div>
+                                        }
+                                    </div>
+                                    <div class="board-task__avatar">
+                                        <YATM.Components.Shared.Avatar User="task.User" />
+                                    </div>
                                 </div>
                             </div>
                         }

@@ -344,8 +344,10 @@ a, .btn-link {
     border-collapse: collapse;
 }
 
-    .board-table th, td {
+    .board-table th,
+    .board-table td {
         border: 1px solid lightgray;
+        background-color: #fafafa;
         padding: 10px;
     }
 
@@ -356,6 +358,7 @@ a, .btn-link {
     margin-bottom: 10px;
     display: flex;
     flex-direction: column;
+    background-color: white;
     gap: 5px;
 }
 
@@ -378,4 +381,8 @@ a, .btn-link {
     align-items: center;
     font-size: 16px;
     font-weight: bold;
+}
+
+.board-task__expire-date {
+    color: gray;
 }

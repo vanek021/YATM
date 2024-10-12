@@ -14,6 +14,12 @@ namespace YATM.Models.Enums
         Neck = 3,
         ThoracicVertebrae = 4,
         RightRibcage = 5,
-        RightFemur = 6
+        RightFemur = 6,
+        LeftRibcage = 7,
+        LeftFemur = 8,
+        RightHand = 9,
+        LeftHand = 10,
+        RightLeg = 11,
+        LeftLeg = 12,
     }
 }

@@ -17,6 +17,9 @@
                     DataSource="Columns" />
         </FormItem>
         <FormItem>
+            <DatePicker Style="width: 100%;" Placeholder="@("Срок выполнения")" @bind-Value="@Task!.ExpireDate" Format="dd/MM/yyyy" />
+        </FormItem>
+        <FormItem>
             <TinyMCE.Blazor.Editor ApiKey="8x4if75v87gl8oelediq72dnb2yomjxelaonbn6p2nyictgk"
                                    Field="() => Task!.Description"
                                    @bind-Value="Task!.Description" />
