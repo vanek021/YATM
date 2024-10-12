@@ -16,40 +16,16 @@ namespace YATM.Data.Seeds
                 {
                     Name = "Нужно сделать",
                     Order = 0,
-                    Tasks = new()
-                    {
-                        new()
-                        {
-                            Name = "Это тестовая задача колонки",
-                            Description = "Тестовая задача, созданная автоматически"
-                        }
-                    }
                 },
                 new BoardColumn()
                 {
                     Name = "В работе",
                     Order = 1,
-                    Tasks = new()
-                    {
-                        new()
-                        {
-                            Name = "Это тестовая задача колонки",
-                            Description = "Тестовая задача, созданная автоматически"
-                        }
-                    }
                 }, 
                 new BoardColumn()
                 {
                     Name = "Готово",
                     Order = 2,
-                    Tasks = new()
-                    {
-                        new()
-                        {
-                            Name = "Это тестовая задача колонки",
-                            Description = "Тестовая задача, созданная автоматически"
-                        }
-                    }
                 }
             }
         };
