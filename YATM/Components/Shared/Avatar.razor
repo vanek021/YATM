@@ -1,0 +1,14 @@
+﻿@using YATM.Infrastructure.Extensions
+@using YATM.Models.Entities
+
+@if (User is not null)
+{
+    <div class="avatar" title="@User.UserName">
+        @User.UserName!.GetInitials()
+    </div>
+}
+
+@code {
+    [Parameter]
+    public User User { get; set; }
+}

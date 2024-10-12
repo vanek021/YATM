@@ -1,4 +1,5 @@
 ﻿using NetTopologySuite.Geometries;
+using YATM.Models.Entities;
 
 namespace YATM.BlazorModels.Boards
 {
@@ -6,6 +7,7 @@ namespace YATM.BlazorModels.Boards
     {
         public long Id { get; set; }
         public long BoardColumnId { get; set; }
+        public User? User { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime? ExpireDate { get; set; }

@@ -55,7 +55,10 @@ else
                         {
                             <div class="board-task">
                                 <div class="board-task__name" @ondblclick="@(_ => OpenTaskEditModal(task))">
-                                    <span class="board-task__task-id">@task.Id</span> @task.Name
+                                    <span class="board-task__task-id">@_activeBoard.Code-@task.Id</span> @task.Name
+                                </div>
+                                <div class="board-task__avatar">
+                                    <YATM.Components.Shared.Avatar User="task.User" />
                                 </div>
                             </div>
                         }
@@ -86,6 +89,8 @@ else
         await GetBoardsAsync();
         await GetItemsAsync();
 
+        _activeBoardId = _activeBoard.Id;
+
         await base.OnInitializedAsync();
     }
 
@@ -105,9 +110,6 @@ else
         var appCtx = db.GetService<ApplicationContext>();
 
         _activeBoard = await boardService.GetBoardBlazorModelByIdOrDefaultAsync(_activeBoardId, appCtx.CurrentUser.Id);
-
-        if (_activeBoard != null && _activeBoardId is null)
-            _activeBoardId = _activeBoard.Id;
     }
 
     private void OpenTaskEditModal(BoardTaskBlazorModel task)
@@ -134,8 +136,8 @@ else
 
     private async Task OnBoardCreateEdit()
     {
-        _activeBoardId = _createEditBoard!.Id;
         await GetBoardsAsync();
+        _activeBoardId = _createEditBoard!.Id;
         await GetItemsAsync();
     }
 }

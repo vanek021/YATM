@@ -13,5 +13,16 @@ namespace YATM.Data.Repositories
         {
 
         }
+
+        protected override IQueryable<BoardTask> SingleWithIncludes()
+        {
+            return base.SingleWithIncludes();
+        }
+
+        protected override IQueryable<BoardTask> ManyWithIncludes()
+        {
+            return SingleWithIncludes()
+                .Include(x => x.User);
+        }
     }
 }

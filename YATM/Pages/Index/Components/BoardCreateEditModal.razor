@@ -1,4 +1,5 @@
 ﻿@using YATM.BlazorModels.Boards
+@using YATM.Infrastructure.Extensions
 @using YATM.Services
 @inject DatabaseFactory dbFactory
 
@@ -33,6 +34,8 @@
         using var db = dbFactory.Create();
         var boardService = db.GetService<BoardService>();
         var appCtx = db.GetService<ApplicationContext>();
+
+        Board!.Code = Board.Name.GetUpperFirstThreeCharacters();
 
         BoardBlazorModel board; 
         if (Board!.Id == default)

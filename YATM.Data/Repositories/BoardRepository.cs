@@ -44,6 +44,7 @@ namespace YATM.Data.Repositories
         {
             return Table()
                 .Where(x => x.Users.Any(u => u.Id == userId))
+                .OrderBy(x => x.CreatedAt)
                 .ToListAsync();
         }
 

@@ -46,6 +46,9 @@
     {
         using var db = dbFactory.Create();
         var boardService = db.GetService<BoardService>();
+        var appCtx = db.GetService<ApplicationContext>();
+
+        Task!.User = appCtx.CurrentUser;
 
         if (Task!.Id == default)
             await boardService.CreateTaskAsync(Task);
