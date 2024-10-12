@@ -359,3 +359,7 @@ a, .btn-link {
 .board-task__task-id {
     color: lightgray;
 }
+
+.board-select {
+    width: 200px;
+}

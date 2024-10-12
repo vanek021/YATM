@@ -10,20 +10,37 @@
 
 @inject DatabaseFactory dbFactory
 
-<PageTitle>@ActiveBoard?.Name</PageTitle>
+<PageTitle>@_activeBoard?.Name</PageTitle>
 
-@if (ActiveBoard is null)
+@if (_activeBoard is null)
 {
     <Spin Size="Large" />
 }
 else
 {
-    <TaskCreateEditModal @ref="_taskCreateEditModal" Task="_createEditTaskModel" Columns="ActiveBoard.Columns" OnOK="GetItemsAsync" />
-    <h1>@ActiveBoard.Name</h1>
+    <TaskCreateEditModal @ref="_taskCreateEditModal" Task="_createEditTask" Columns="_activeBoard.Columns" OnOK="GetItemsAsync" />
+    <BoardCreateEditModal @ref="_boardCreateEditModal" Board="_createEditBoard" OnOK="OnBoardCreateEdit" />
+    <h1>@_activeBoard.Name</h1>
+    <Flex Gap="small" Style="padding-bottom: 10px;">
+        <div>
+            <Button OnClick="OpenBoardCreateModal" Icon="@IconType.Outline.Plus">
+                Создать доску
+            </Button>
+        </div>
+        <div class="board-select">
+            <Select @bind-Value="_activeBoardId"
+                    TItem="BoardShortBlazorModel"
+                    TItemValue="long?"
+                    LabelName="@nameof(BoardShortBlazorModel.Name)"
+                    ValueName="@nameof(BoardShortBlazorModel.Id)"
+                    OnSelectedItemChanged="GetItemsAsync"
+                    DataSource="_boards" />
+        </div>
+    </Flex>
     <table class="table board-table">
         <thead>
             <tr>
-                @foreach (var col in ActiveBoard.Columns)
+                @foreach (var col in _activeBoard.Columns)
                 {
                     <th scope="col">@col.Name</th>
                 }
@@ -31,7 +48,7 @@ else
         </thead>
         <tbody>
             <tr>
-                @foreach (var col in ActiveBoard.Columns)
+                @foreach (var col in _activeBoard.Columns)
                 {
                     <td scope="row">
                         @foreach (var task in col.Tasks)
@@ -56,41 +73,69 @@ else
     [Parameter]
     public string? BoardName { get; set; }
 
-    public List<BoardBlazorModel> Boards { get; set; } = new();
-    public BoardBlazorModel ActiveBoard { get; set; }
-
+    private List<BoardShortBlazorModel> _boards { get; set; } = new();
+    private long? _activeBoardId;
+    private BoardBlazorModel _activeBoard { get; set; }
     private TaskCreateEditModal? _taskCreateEditModal;
-    private BoardTaskBlazorModel? _createEditTaskModel;
+    private BoardTaskBlazorModel? _createEditTask;
+    private BoardBlazorModel? _createEditBoard;
+    private BoardCreateEditModal? _boardCreateEditModal;
 
     protected override async Task OnInitializedAsync()
     {
+        await GetBoardsAsync();
         await GetItemsAsync();
 
         await base.OnInitializedAsync();
+    }
+
+    private async Task GetBoardsAsync()
+    {
+        using var db = dbFactory.Create();
+        var boardService = db.GetService<BoardService>();
+        var appCtx = db.GetService<ApplicationContext>();
+
+        _boards = await boardService.GetBoardBlazorModelsAsync(appCtx.CurrentUser.Id);
     }
 
     private async Task GetItemsAsync()
     {
         using var db = dbFactory.Create();
         var boardService = db.GetService<BoardService>();
+        var appCtx = db.GetService<ApplicationContext>();
 
-        Boards = await boardService.GetBoardBlazorModelsAsync();
-        ActiveBoard = await boardService.GetBoardBlazorModelByNameAsync(BoardName ?? BoardConstants.MainBoard);
+        _activeBoard = await boardService.GetBoardBlazorModelByIdOrDefaultAsync(_activeBoardId, appCtx.CurrentUser.Id);
+
+        if (_activeBoard != null && _activeBoardId is null)
+            _activeBoardId = _activeBoard.Id;
     }
 
     private void OpenTaskEditModal(BoardTaskBlazorModel task)
     {
-        _createEditTaskModel = task;
+        _createEditTask = task;
         _taskCreateEditModal!.OpenModal();
     }
 
     private void OpenTaskCreateModal()
     {
-        _createEditTaskModel = new BoardTaskBlazorModel()
+        _createEditTask = new BoardTaskBlazorModel()
             {
-                BoardColumnId = ActiveBoard.Columns.OrderBy(c => c.Order).First().Id
+                BoardColumnId = _activeBoard.Columns.OrderBy(c => c.Order).First().Id
             };
 
         _taskCreateEditModal!.OpenModal();
+    }
+
+    private void OpenBoardCreateModal()
+    {
+        _createEditBoard = new BoardBlazorModel();
+        _boardCreateEditModal!.OpenModal();
+    }
+
+    private async Task OnBoardCreateEdit()
+    {
+        _activeBoardId = _createEditBoard!.Id;
+        await GetBoardsAsync();
+        await GetItemsAsync();
     }
 }

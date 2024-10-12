@@ -19,6 +19,11 @@ namespace YATM.Data
         {
             builder.HasPostgresExtension("postgis");
 
+            builder.Entity<Board>()
+                .HasMany(e => e.Users)
+                .WithMany(e => e.Boards)
+                .UsingEntity<BoardUsers>();
+
             builder.Entity<Note>()
                 .HasMany(e => e.NoteTags)
                 .WithMany(e => e.Notes)

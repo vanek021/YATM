@@ -10,6 +10,9 @@ namespace YATM.BlazorModels.Boards
             CreateMap<Board, BoardBlazorModel>();
             CreateMap<BoardBlazorModel, Board>();
 
+            CreateMap<Board, BoardShortBlazorModel>();
+            CreateMap<BoardShortBlazorModel, Board>();
+
             CreateMap<BoardColumn, BoardColumnBlazorModel>();
             CreateMap<BoardColumnBlazorModel, BoardColumn>();
 

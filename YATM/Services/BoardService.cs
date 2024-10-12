@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using YATM.BlazorModels.Boards;
 using YATM.Data;
+using YATM.Data.Seeds;
+using YATM.Models.Entities;
 using YATM.Models.Entities.Boards;
 
 namespace YATM.Services
@@ -16,9 +18,57 @@ namespace YATM.Services
             _mapper = mapper;
         }
 
-        public async Task<BoardBlazorModel> GetBoardBlazorModelByNameAsync(string boardName)
+        public async Task<BoardBlazorModel> CreateBoardAsync(BoardBlazorModel boardBlazorModel, User user)
         {
-            var board = await _db.Boards.GetBoardByName(boardName);
+            var board = _mapper.Map<Board>(boardBlazorModel);
+
+            board.Columns = BoardSeeds.MainBoard.Columns;
+            board.BoardUsers.Add(new BoardUsers()
+            {
+                Board = board,
+                User = user,
+                IsOwner = true
+            });
+
+            _db.Boards.Insert(board);
+            await _db.SaveChangesAsync();
+
+            return _mapper.Map<BoardBlazorModel>(board);
+        }
+
+        public async Task<BoardBlazorModel> EditBoardAsync(BoardBlazorModel boardBlazorModel, User user)
+        {
+            var board = await _db.Boards.GetById(boardBlazorModel.Id, user.Id);
+
+            if (board is null)
+                throw new ArgumentNullException();
+
+            _mapper.Map(boardBlazorModel, board);
+
+            _db.Boards.Update(board);
+            await _db.SaveChangesAsync();
+
+            return _mapper.Map<BoardBlazorModel>(board);
+        }
+
+        public async Task<List<BoardShortBlazorModel>> GetBoardBlazorModelsAsync(long userId)
+        {
+            var boards = await _db.Boards.GetAllBoardsWithoutIncludes(userId);
+            return _mapper.Map<List<BoardShortBlazorModel>>(boards);
+        }
+
+        public async Task<BoardBlazorModel> GetBoardBlazorModelByIdOrDefaultAsync(long? boardId, long userId)
+        {
+            Board? board;
+
+            if (boardId.HasValue)
+            {
+                board = await _db.Boards.GetById(boardId.Value, userId);
+            }
+            else
+            {
+                board = await _db.Boards.GetDefault(userId);
+            }
 
             if (board == null)
                 return new();
@@ -38,13 +88,6 @@ namespace YATM.Services
             var boardBlazorModel = _mapper.Map<BoardBlazorModel>(board);
 
             return boardBlazorModel;
-        }
-
-        public async Task<List<BoardBlazorModel>> GetBoardBlazorModelsAsync()
-        {
-            var boards = await _db.Boards.GetAllBoards();
-
-            return _mapper.Map<List<BoardBlazorModel>>(boards);
         }
 
         public async Task DeleteTaskAsync(long taskId)

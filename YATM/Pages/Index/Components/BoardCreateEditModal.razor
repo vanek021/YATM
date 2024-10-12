@@ -1,0 +1,57 @@
+﻿@using YATM.BlazorModels.Boards
+@using YATM.Services
+@inject DatabaseFactory dbFactory
+
+<Modal Visible="visible" Closable="false" Centered="true" OnOk="OnOKClicked" OnCancel="OnCancelClicked" Title="@Board?.Name">
+    <Form Model="Board">
+        <FormItem>
+            <Input Placeholder="Название" @bind-Value="@Board!.Name" />
+        </FormItem>
+        <FormItem>
+            <Input Placeholder="Описание" @bind-Value="@Board!.Description" />
+        </FormItem>
+    </Form>
+</Modal>
+
+@code {
+    [Parameter]
+    public BoardBlazorModel? Board { get; set; } = new();
+
+    [Parameter]
+    public EventCallback OnOK { get; set; }
+
+    private bool visible = false;
+
+    public void OpenModal()
+    {
+        visible = true;
+        StateHasChanged();
+    }
+
+    private async Task OnOKClicked()
+    {
+        using var db = dbFactory.Create();
+        var boardService = db.GetService<BoardService>();
+        var appCtx = db.GetService<ApplicationContext>();
+
+        BoardBlazorModel board; 
+        if (Board!.Id == default)
+            board = await boardService.CreateBoardAsync(Board, appCtx.CurrentUser);
+        else
+            board = await boardService.EditBoardAsync(Board, appCtx.CurrentUser);
+
+        Board.Id = board.Id;
+
+        if (OnOK.HasDelegate)
+            await OnOK.InvokeAsync();
+
+        visible = false;
+        StateHasChanged();
+    }
+
+    private void OnCancelClicked()
+    {
+        visible = false;
+        StateHasChanged();
+    }
+}
