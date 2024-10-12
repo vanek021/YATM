@@ -301,7 +301,6 @@ a, .btn-link {
     height: 50px;
     line-height: 50px;
     text-align: center;
-    
 }
 
     .col-temp__entry:not(:last-child) {
@@ -317,4 +316,46 @@ a, .btn-link {
 }
 
 .col-temp__note-body {
+}
+
+.timer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+    .timer button {
+        border-radius: 0px !important;
+    }
+
+.timer__elapsed {
+    height: 24px;
+    line-height: 24px;
+    color: #001529;
+    background-color: #fff;
+    border: 1px solid #d9d9d9;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.board-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+    .board-table th, td {
+        border: 1px solid lightgray;
+        padding: 10px;
+    }
+
+.board-task {
+    border: 1px solid lightgray;
+    padding: 10px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.board-task__task-id {
+    color: lightgray;
 }

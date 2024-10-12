@@ -18,17 +18,38 @@
 }
 else
 {
-@*    <Table TItem="BoardColumnBlazorModel" DataSource="ActiveBoard.Columns" HidePagination="true" Class="board-table">
-        @foreach (var column in ActiveBoard.Columns)
-        {
-            <Column @bind-Field="Ac.Tasks" Title="@column.Name">
-                @foreach (var task in column.Tasks) 
+    <TaskCreateEditModal @ref="_taskCreateEditModal" Task="_createEditTaskModel" Columns="ActiveBoard.Columns" OnOK="GetItemsAsync" />
+    <h1>@ActiveBoard.Name</h1>
+    <table class="table board-table">
+        <thead>
+            <tr>
+                @foreach (var col in ActiveBoard.Columns)
                 {
-                    <TaskTableItem Task="task" ItemChangedCallback="GetItemsAsync" />
+                    <th scope="col">@col.Name</th>
                 }
-            </Column>
-        }
-    </Table>*@
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                @foreach (var col in ActiveBoard.Columns)
+                {
+                    <td scope="row">
+                        @foreach (var task in col.Tasks)
+                        {
+                            <div class="board-task">
+                                <div class="board-task__name" @ondblclick="@(_ => OpenTaskEditModal(task))">
+                                    <span class="board-task__task-id">@task.Id</span> @task.Name
+                                </div>
+                            </div>
+                        }
+                        <div class="board-task__create">
+                            <Button OnClick="OpenTaskCreateModal">Создать..</Button>
+                        </div>
+                    </td>
+                }
+            </tr>
+        </tbody>
+    </table>
 }
 
 @code {
@@ -37,6 +58,9 @@ else
 
     public List<BoardBlazorModel> Boards { get; set; } = new();
     public BoardBlazorModel ActiveBoard { get; set; }
+
+    private TaskCreateEditModal? _taskCreateEditModal;
+    private BoardTaskBlazorModel? _createEditTaskModel;
 
     protected override async Task OnInitializedAsync()
     {
@@ -52,5 +76,21 @@ else
 
         Boards = await boardService.GetBoardBlazorModelsAsync();
         ActiveBoard = await boardService.GetBoardBlazorModelByNameAsync(BoardName ?? BoardConstants.MainBoard);
+    }
+
+    private void OpenTaskEditModal(BoardTaskBlazorModel task)
+    {
+        _createEditTaskModel = task;
+        _taskCreateEditModal!.OpenModal();
+    }
+
+    private void OpenTaskCreateModal()
+    {
+        _createEditTaskModel = new BoardTaskBlazorModel()
+            {
+                BoardColumnId = ActiveBoard.Columns.OrderBy(c => c.Order).First().Id
+            };
+
+        _taskCreateEditModal!.OpenModal();
     }
 }

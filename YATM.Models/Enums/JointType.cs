@@ -12,5 +12,8 @@ namespace YATM.Models.Enums
         LeftEar = 1,
         Head = 2,
         Neck = 3,
+        ThoracicVertebrae = 4,
+        RightRibcage = 5,
+        RightFemur = 6
     }
 }

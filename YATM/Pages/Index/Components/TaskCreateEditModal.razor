@@ -1,31 +1,67 @@
 ﻿@using YATM.BlazorModels.Boards;
+@using YATM.Services
 
 @inject DatabaseFactory dbFactory
 
-<Modal Visible="visible" Closable="false" Centered="true" OnOk="OnOK" OnCancel="OnCancel" Title="@Task.Name">
-
+<Modal Visible="visible" Closable="false" Centered="true" OnOk="OnOKClicked" OnCancel="OnCancelClicked" Title="@Task?.Name">
+    <Form Model="Task">
+        <FormItem>
+            <Input Placeholder="Название" @bind-Value="@Task!.Name" />
+        </FormItem>
+        <FormItem>
+            <Select @bind-Value="Task!.BoardColumnId"
+                    LabelName="@nameof(BoardColumnBlazorModel.Name)"
+                    ValueName="@nameof(BoardColumnBlazorModel.Id)"
+                    TItem="BoardColumnBlazorModel"
+                    TItemValue="long" 
+                    DataSource="Columns" />
+        </FormItem>
+        <FormItem>
+            <TinyMCE.Blazor.Editor ApiKey="8x4if75v87gl8oelediq72dnb2yomjxelaonbn6p2nyictgk"
+                                   Field="() => Task!.Description"
+                                   @bind-Value="Task!.Description" />
+        </FormItem>
+    </Form>
 </Modal>
 
 @code {
     [Parameter]
     public BoardTaskBlazorModel? Task { get; set; }
 
+    [Parameter]
+    public List<BoardColumnBlazorModel> Columns { get; set; } = new();
+
+    [Parameter]
+    public EventCallback OnOK { get; set; }
+
     private bool visible = false;
 
     public void OpenModal()
     {
         visible = true;
-
         StateHasChanged();
     }
 
-    private void OnOK()
+    private async Task OnOKClicked()
     {
+        using var db = dbFactory.Create();
+        var boardService = db.GetService<BoardService>();
+
+        if (Task!.Id == default)
+            await boardService.CreateTaskAsync(Task);
+        else
+            await boardService.UpdateTaskAsync(Task);
+
+        if (OnOK.HasDelegate)
+            await OnOK.InvokeAsync();
+
         visible = false;
+        StateHasChanged();
     }
 
-    private void OnCancel()
+    private void OnCancelClicked()
     {
         visible = false;
+        StateHasChanged();
     }
 }

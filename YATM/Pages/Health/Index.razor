@@ -114,7 +114,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        _currentDate = DateOnly.FromDateTime(DateTime.UtcNow.ToYektTime());
         await GetItemsAsync();
         await base.OnInitializedAsync();
     }
@@ -143,10 +143,12 @@
 
     private void CreateNewTempRecord()
     {
+        var yektTime = DateTime.UtcNow.ToYektTime();
+
         _newTemperatureRecord = new TemperatureRecordBlazorModel()
             {
-                RecordedAt = TimeOnly.FromDateTime(DateTime.UtcNow.ToYektTime()),
-                RecordedAtDate = DateOnly.FromDateTime(DateTime.UtcNow),
+                RecordedAt = TimeOnly.FromDateTime(yektTime),
+                RecordedAtDate = DateOnly.FromDateTime(yektTime),
                 TempValue = 36.6
             };
         StateHasChanged();

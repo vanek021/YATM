@@ -1,0 +1,61 @@
+﻿@using System.Timers;
+
+<div class="timer">
+    <div class="timer__elapsed">
+        @timeElapsed
+    </div>
+    <Button Size="@ButtonSize.Small" OnClick="Stop" Icon="@(isRunning && timeElapsed != defaultElapsedLabel ? IconType.Outline.Pause : IconType.Outline.Stop)" />
+    <Button Size="@ButtonSize.Small" OnClick="Start" Icon="@IconType.Outline.CaretRight" />
+</div>
+
+@code {
+    private const string defaultElapsedLabel = "00:00:00";
+
+    private bool isRunning = false;
+    private string? timeElapsed;
+    private Timer? timer;
+    private DateTime startTime;
+
+    protected override Task OnInitializedAsync()
+    {
+        timeElapsed = defaultElapsedLabel;
+
+        return base.OnInitializedAsync();
+    }
+
+    public void Start()
+    {
+        if (!isRunning)
+        {
+            startTime = DateTime.Now;
+            timer = new Timer(1000);
+            timer.Elapsed += OnTimerElapsed;
+            timer.Start();
+            isRunning = true;
+        }
+    }
+
+    public void Stop()
+    {
+        if (isRunning && timer != null)
+        {
+            timer.Stop();
+            timer.Dispose();
+            isRunning = false;
+        }
+        else
+        {
+            timeElapsed = "00:00:00";
+        }
+    }
+
+    private void OnTimerElapsed(object? sender, ElapsedEventArgs e)
+    {
+        InvokeAsync(() =>
+        {
+            var elapsedTime = DateTime.Now - startTime;
+            timeElapsed = elapsedTime.ToString(@"hh\:mm\:ss");
+            StateHasChanged();
+        });
+    }
+}

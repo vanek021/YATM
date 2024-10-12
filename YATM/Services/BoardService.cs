@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using YATM.BlazorModels.Boards;
 using YATM.Data;
+using YATM.Models.Entities.Boards;
 
 namespace YATM.Services
 {
@@ -54,6 +55,25 @@ namespace YATM.Services
                 return;
 
             _db.BoardTasks.Delete(task);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task UpdateTaskAsync(BoardTaskBlazorModel taskBlazorModel)
+        {
+            var task = await _db.BoardTasks.GetByIdAsync(taskBlazorModel.Id);
+
+            if (task is null)
+                return;
+
+            _mapper.Map(taskBlazorModel, task);
+            _db.BoardTasks.Update(task);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task CreateTaskAsync(BoardTaskBlazorModel taskBlazorModel)
+        {
+            var task = _mapper.Map<BoardTask>(taskBlazorModel);
+            _db.BoardTasks.Insert(task);
             await _db.SaveChangesAsync();
         }
     }

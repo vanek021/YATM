@@ -1,4 +1,5 @@
-﻿@inherits LayoutComponentBase
+﻿@using YATM.Components.Shared
+@inherits LayoutComponentBase
 
 @inject AuthenticationStateProvider authenticationStateProvider
 @inject NavigationManager navManager
@@ -21,6 +22,7 @@
                         <NavLink class="menu__item" href="health">
                             Здоровье
                         </NavLink>
+                        <SimpleTimer />
                     </nav>
                 </div>
 
