@@ -18,6 +18,7 @@ namespace YATM.Data.Repositories
         protected override IQueryable<Board> SingleWithIncludes()
         {
             return base.SingleWithIncludes()
+                .Where(b => !b.IsDeleted)
                 .Include(b => b.Users)
                 .Include(b => b.Columns)
                     .ThenInclude(c => c.Tasks);

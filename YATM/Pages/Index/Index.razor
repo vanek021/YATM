@@ -2,6 +2,7 @@
 @page "/{BoardName}"
 
 @using YATM.BlazorModels.Boards;
+@using YATM.Components.Shared
 @using YATM.Infrastructure.Extensions
 @using YATM.Models.Constants;
 @using YATM.Pages.Index.Components
@@ -36,6 +37,9 @@ else
                     ValueName="@nameof(BoardShortBlazorModel.Id)"
                     OnSelectedItemChanged="GetItemsAsync"
                     DataSource="_boards" />
+        </div>
+        <div>
+            <Button Danger Icon="@IconType.Outline.Delete"></Button>
         </div>
     </Flex>
     <table class="table board-table">
@@ -81,6 +85,10 @@ else
     </table>
 }
 
+<ConfirmationModal @ref="_boardDeleteConfirmationModal" OnConfirm="OnBoardDeleteConfirm" OnCancel="OnBoardDeleteCancel">
+    Вы действительно хотите удалить доску @_activeBoard!.Name?
+</ConfirmationModal>
+
 @code {
     [Parameter]
     public string? BoardName { get; set; }
@@ -92,6 +100,7 @@ else
     private BoardTaskBlazorModel? _createEditTask;
     private BoardBlazorModel? _createEditBoard;
     private BoardCreateEditModal? _boardCreateEditModal;
+    private ConfirmationModal? _boardDeleteConfirmationModal;
 
     protected override async Task OnInitializedAsync()
     {
@@ -148,5 +157,25 @@ else
         await GetBoardsAsync();
         _activeBoardId = _createEditBoard!.Id;
         await GetItemsAsync();
+    }
+
+    private async Task OnBoardDelete()
+    {
+        _boardDeleteConfirmationModal!.Show();
+    }
+
+    private async Task OnBoardDeleteConfirm()
+    {
+        using var db = dbFactory.Create();
+        var boardService = db.GetService<BoardService>();
+        await boardService.DeleteBoardAsync(_activeBoard.Id);
+        _boardDeleteConfirmationModal!.Hide();
+
+        await OnInitializedAsync();
+    }
+
+    private async Task OnBoardDeleteCancel()
+    {
+        _boardDeleteConfirmationModal!.Hide();
     }
 }
