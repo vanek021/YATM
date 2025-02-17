@@ -24,5 +24,19 @@ namespace YATM.Data.Repositories
             return SingleWithIncludes()
                 .Include(x => x.User);
         }
+
+        public override void Insert(BoardTask entity)
+        {
+            var boardColumn = TableReadOnly<BoardColumn>().Single(x => x.Id == entity.BoardColumnId);
+
+            var maxTaskNumber = Table()
+                .Where(x => x.Column.BoardId == boardColumn.BoardId)
+                .OrderBy(x => x.TaskNumber)
+                .Max(x => x.TaskNumber);
+            
+            entity.TaskNumber = maxTaskNumber + 1;
+            
+            base.Insert(entity);
+        }
     }
 }
