@@ -6,6 +6,9 @@
 <Modal Visible="visible" Closable="false" Centered="true" OnOk="OnOKClicked" OnCancel="OnCancelClicked" Title="@Task?.Name">
     <Form Model="Task">
         <FormItem>
+            <Button Danger OnClick="DeleteTask" Icon="@IconType.Outline.Delete" />
+        </FormItem>
+        <FormItem>
             <Input Placeholder="Название" @bind-Value="@Task!.Name" />
         </FormItem>
         <FormItem>
@@ -67,6 +70,20 @@
 
     private void OnCancelClicked()
     {
+        visible = false;
+        StateHasChanged();
+    }
+
+    private async Task DeleteTask()
+    {
+        using var db = dbFactory.Create();
+        var boardService = db.GetService<BoardService>();
+
+        await boardService.DeleteTaskAsync(Task!.Id);
+
+        if (OnOK.HasDelegate)
+            await OnOK.InvokeAsync();
+        
         visible = false;
         StateHasChanged();
     }
