@@ -23,7 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="BlazorModels\Users\" />
     <Folder Include="wwwroot\lib\" />
   </ItemGroup>
 
