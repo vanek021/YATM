@@ -15,6 +15,12 @@ namespace YATM.Data.Repositories
 
         }
 
+        protected IQueryable<Board> WithoutIncludes()
+        {
+            return Table()
+                .Where(b => !b.IsDeleted);
+        }
+
         protected override IQueryable<Board> SingleWithIncludes()
         {
             return base.SingleWithIncludes()
@@ -43,7 +49,7 @@ namespace YATM.Data.Repositories
 
         public Task<List<Board>> GetAllBoardsWithoutIncludes(long userId)
         {
-            return Table()
+            return WithoutIncludes()
                 .Where(x => x.Users.Any(u => u.Id == userId))
                 .OrderBy(x => x.CreatedAt)
                 .ToListAsync();
