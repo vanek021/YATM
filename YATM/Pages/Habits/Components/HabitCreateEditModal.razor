@@ -1,0 +1,65 @@
+@using YATM.BlazorModels.Habits
+@using YATM.Services
+@inject DatabaseFactory dbFactory
+
+<Modal Visible="visible" Closable="false" Centered="true" OnOk="OnOKClicked" OnCancel="OnCancelClicked" Title="@ModalTitle">
+    <Form Model="Habit" @ref="form">
+        <FormItem>
+            <Input Placeholder="Название" @bind-Value="@Habit!.Name" />
+        </FormItem>
+        <FormItem>
+            <TextArea Placeholder="Описание" @bind-Value="@Habit!.Description" />
+        </FormItem>
+    </Form>
+</Modal>
+
+@code {
+    [Parameter]
+    public HabitBlazorModel? Habit { get; set; } = new();
+
+    [Parameter]
+    public EventCallback OnOK { get; set; }
+
+    private bool visible = false;
+    private Form<HabitBlazorModel?>? form;
+
+    private string ModalTitle => Habit?.Id == default ? "Новая привычка" : Habit?.Name ?? "Привычка";
+
+    public void OpenModal()
+    {
+        visible = true;
+        StateHasChanged();
+    }
+
+    private async Task OnOKClicked()
+    {
+        var isValid = form?.Validate() ?? false;
+        if (!isValid)
+            return;
+
+        using var db = dbFactory.Create();
+        var habitService = db.GetService<HabitService>();
+        var appCtx = db.GetService<ApplicationContext>();
+
+        if (Habit!.Id == default)
+        {
+            Habit = await habitService.CreateHabitAsync(appCtx.CurrentUser, Habit);
+        }
+        else
+        {
+            await habitService.UpdateHabitAsync(appCtx.CurrentUser, Habit);
+        }
+
+        if (OnOK.HasDelegate)
+            await OnOK.InvokeAsync();
+
+        visible = false;
+        StateHasChanged();
+    }
+
+    private void OnCancelClicked()
+    {
+        visible = false;
+        StateHasChanged();
+    }
+}
