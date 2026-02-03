@@ -1,5 +1,4 @@
-using System;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -8,8 +7,6 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace YATM.Data.Migrations
 {
     /// <inheritdoc />
-    [DbContext(typeof(AppDbContext))]
-    [Migration("20260203120000_AddHabitsModule")]
     public partial class AddHabitsModule : Migration
     {
         /// <inheritdoc />
@@ -66,22 +63,6 @@ namespace YATM.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Habits_Id",
-                table: "Habits",
-                column: "Id",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Habits_UserId",
-                table: "Habits",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_HabitCheckIns_HabitId",
-                table: "HabitCheckIns",
-                column: "HabitId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_HabitCheckIns_HabitId_CheckInDate",
                 table: "HabitCheckIns",
                 columns: new[] { "HabitId", "CheckInDate" },
@@ -92,6 +73,17 @@ namespace YATM.Data.Migrations
                 table: "HabitCheckIns",
                 column: "Id",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Habits_Id",
+                table: "Habits",
+                column: "Id",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Habits_UserId",
+                table: "Habits",
+                column: "UserId");
         }
 
         /// <inheritdoc />
