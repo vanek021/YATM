@@ -1,9 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using YATM.Models.Constants;
 using YATM.Models.Entities.Boards;
 
@@ -11,7 +6,7 @@ namespace YATM.Data.Seeds
 {
     public static class BoardSeeds
     {
-        private static readonly Board MainBoard = new()
+        public static Board MainBoard => new()
         {
             Name = BoardConstants.MainBoard,
             Description = "Автоматически создаваемая доска",
@@ -20,17 +15,17 @@ namespace YATM.Data.Seeds
                 new BoardColumn()
                 {
                     Name = "Нужно сделать",
-                    Order = 0
+                    Order = 0,
                 },
                 new BoardColumn()
                 {
                     Name = "В работе",
-                    Order = 1
+                    Order = 1,
                 }, 
                 new BoardColumn()
                 {
                     Name = "Готово",
-                    Order = 2
+                    Order = 2,
                 }
             }
         };
@@ -40,12 +35,28 @@ namespace YATM.Data.Seeds
             using var scope = serviceProvider.CreateScope();
             var ctx = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            var board = ctx.Boards.SingleOrDefault(b => b.Name == MainBoard.Name);
+            var boards = ctx.Boards.ToList();
 
-            if (board is null)
-                ctx.Boards.Add(MainBoard);
-                
-            ctx.SaveChanges();
+            if (!boards.Any())
+            {
+                var users = ctx.Users.ToList();
+
+                foreach (var user in users)
+                {
+                    var board = MainBoard;
+
+                    board.BoardUsers.Add(new BoardUsers()
+                    {
+                        Board = board,
+                        User = user,
+                        IsOwner = true
+                    });
+
+                    ctx.Boards.Add(board);
+                }
+
+                ctx.SaveChanges();
+            }
         }
     }
 }

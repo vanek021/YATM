@@ -1,0 +1,323 @@
+@page "/habits"
+
+@using System.Globalization
+@using YATM.BlazorModels.Habits
+@using YATM.Infrastructure.Extensions
+@using YATM.Pages.Habits.Components
+@using YATM.Services
+
+@attribute [Authorize]
+
+@inject DatabaseFactory dbFactory
+
+<PageTitle>Привычки</PageTitle>
+
+<HabitCreateEditModal @ref="_habitCreateEditModal" Habit="_editHabit" OnOK="OnHabitSaved" />
+
+<h1>Привычки: без самообмана</h1>
+
+<div class="row habits-toolbar">
+    <div class="col-lg-2 col-md-12 col-sm-12 col-12">
+        <div class="d-flex justify-content-center">
+            <DatePicker @bind-Value="_selectedDate" TValue="DateOnly" OnChange="ChangeDate" Format="MM/dd/yyyy" />
+        </div>
+    </div>
+    <div class="col-lg-6 col-md-12 col-sm-12 col-12 mt-lg-0 mt-md-2 mt-sm-2 mt-2">
+        <div class="habit-date-nav">
+            <Button OnClick="ChangeDateToPreviousDay" Icon="@IconType.Outline.Left" />
+            <div class="habit-date-label">@_selectedDate.GetDateWithDayAndMonthName()</div>
+            <Button OnClick="ChangeDateToNextDay" Icon="@IconType.Outline.Right" />
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-12 col-sm-12 col-12 mt-lg-0 mt-md-2 mt-sm-2 mt-2 text-end">
+        <Button OnClick="OpenHabitCreateModal" Icon="@IconType.Outline.Plus">
+            Создать привычку
+        </Button>
+    </div>
+</div>
+
+@if (_habits == null)
+{
+    <Spin Size="Large" />
+}
+else if (!_habits.Any())
+{
+    <div class="habit-empty">Пока нет привычек. Создайте первую и отмечайте честно.</div>
+}
+else
+{
+    <div class="habits-list">
+        @foreach (var habit in _habits)
+        {
+            var checkIn = GetCheckIn(habit.Id);
+            <div class="habit-card">
+                <div class="habit-card__header">
+                    <div class="habit-card__title">@habit.Name</div>
+                    <div class="habit-card__actions">
+                        <Button OnClick="@(() => OpenHabitEditModal(habit))" Icon="@IconType.Outline.Edit" />
+                    </div>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(habit.Description))
+                {
+                    <div class="habit-card__description">@habit.Description</div>
+                }
+                <div class="habit-card__status">
+                    @if (checkIn == null)
+                    {
+                        <Tag>Не отмечено</Tag>
+                    }
+                    else if (checkIn.IsCompleted)
+                    {
+                        <Tag Color="green">Сделано</Tag>
+                    }
+                    else
+                    {
+                        <Tag Color="red">Срыв</Tag>
+                    }
+                </div>
+                <div class="habit-card__controls">
+                    <Button OnClick="@(() => MarkCompletedAsync(habit.Id))" Icon="@IconType.Outline.Check">
+                        Сделано
+                    </Button>
+                    <Button Danger OnClick="@(() => StartMissedReason(habit.Id))" Icon="@IconType.Outline.Close">
+                        Не сделал
+                    </Button>
+                </div>
+                @if (IsReasonEditorOpen(habit.Id))
+                {
+                    <div class="habit-card__reason">
+                        <TextArea @bind-Value="_reasonDrafts[habit.Id]" Placeholder="Почему не получилось?" Style="min-height: 80px;" />
+                        @if (_reasonErrors.TryGetValue(habit.Id, out var errorMessage))
+                        {
+                            <div class="habit-card__error">@errorMessage</div>
+                        }
+                        <div class="habit-card__reason-actions">
+                            <Button Type="primary" OnClick="@(() => SaveMissedReasonAsync(habit.Id))">
+                                Сохранить причину
+                            </Button>
+                            <Button OnClick="@(() => CancelMissedReason(habit.Id))">Отмена</Button>
+                        </div>
+                    </div>
+                }
+                else if (checkIn != null && !checkIn.IsCompleted && !string.IsNullOrWhiteSpace(checkIn.FailureReason))
+                {
+                    <div class="habit-card__reason-view">
+                        <div class="habit-card__reason-title">Причина:</div>
+                        <div class="habit-card__reason-text">@checkIn.FailureReason</div>
+                        <Button Size="small" OnClick="@(() => StartMissedReason(habit.Id))">Изменить</Button>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+}
+
+<div class="habit-reasons">
+    <h2>Причины срывов</h2>
+    <div class="habit-reasons__subtitle">Последние 30 дней</div>
+    @if (_reasonStats.Any())
+    {
+        var total = _reasonStats.Sum(stat => stat.Count);
+        <div class="habit-reasons__chart">
+            @foreach (var stat in _reasonStats)
+            {
+                var percent = total == 0 ? 0 : stat.Count * 100.0 / total;
+                <div class="habit-reasons__row">
+                    <div class="habit-reasons__label">@stat.Reason</div>
+                    <div class="habit-reasons__bar">
+                        <div class="habit-reasons__fill" style="width:@percent.ToString("0.#", CultureInfo.InvariantCulture)%"></div>
+                    </div>
+                    <div class="habit-reasons__count">@stat.Count</div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="habit-reasons__empty">Пока нет причин срывов за выбранный период.</div>
+    }
+</div>
+
+@code {
+    private DateOnly _selectedDate;
+    private List<HabitBlazorModel> _habits = new();
+    private Dictionary<long, HabitCheckInBlazorModel> _checkInsByHabitId = new();
+    private Dictionary<long, string> _reasonDrafts = new();
+    private Dictionary<long, string> _reasonErrors = new();
+    private HashSet<long> _reasonEditors = new();
+    private List<HabitFailureReasonStat> _reasonStats = new();
+    private HabitCreateEditModal? _habitCreateEditModal;
+    private HabitBlazorModel? _editHabit;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _selectedDate = DateOnly.FromDateTime(DateTime.UtcNow.ToYektTime());
+        await LoadHabitsAsync();
+        await LoadCheckInsAndStatsAsync();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task LoadHabitsAsync()
+    {
+        using var db = dbFactory.Create();
+        var habitService = db.GetService<HabitService>();
+        var appCtx = db.GetService<ApplicationContext>();
+
+        _habits = await habitService.GetHabitsByUserAsync(appCtx.CurrentUser);
+    }
+
+    private async Task LoadCheckInsAndStatsAsync()
+    {
+        using var db = dbFactory.Create();
+        var habitService = db.GetService<HabitService>();
+        var appCtx = db.GetService<ApplicationContext>();
+
+        var checkIns = await habitService.GetCheckInsForDateAsync(appCtx.CurrentUser, _selectedDate);
+        _checkInsByHabitId = checkIns.ToDictionary(c => c.HabitId, c => c);
+
+        var statsFrom = _selectedDate.AddDays(-29);
+        _reasonStats = await habitService.GetFailureReasonStatsAsync(appCtx.CurrentUser, statsFrom, _selectedDate);
+
+        SyncReasonDrafts();
+    }
+
+    private void SyncReasonDrafts()
+    {
+        foreach (var checkIn in _checkInsByHabitId.Values)
+        {
+            if (!checkIn.IsCompleted && !_reasonDrafts.ContainsKey(checkIn.HabitId))
+                _reasonDrafts[checkIn.HabitId] = checkIn.FailureReason ?? string.Empty;
+        }
+    }
+
+    private HabitCheckInBlazorModel? GetCheckIn(long habitId)
+    {
+        return _checkInsByHabitId.TryGetValue(habitId, out var checkIn) ? checkIn : null;
+    }
+
+    private bool IsReasonEditorOpen(long habitId)
+    {
+        return _reasonEditors.Contains(habitId);
+    }
+
+    private void OpenHabitCreateModal()
+    {
+        _editHabit = new HabitBlazorModel();
+        _habitCreateEditModal!.OpenModal();
+    }
+
+    private void OpenHabitEditModal(HabitBlazorModel habit)
+    {
+        _editHabit = new HabitBlazorModel
+        {
+            Id = habit.Id,
+            Name = habit.Name,
+            Description = habit.Description,
+            IsArchived = habit.IsArchived
+        };
+        _habitCreateEditModal!.OpenModal();
+    }
+
+    private async Task OnHabitSaved()
+    {
+        await LoadHabitsAsync();
+        await LoadCheckInsAndStatsAsync();
+        StateHasChanged();
+    }
+
+    private async Task SaveCheckInAsync(HabitCheckInBlazorModel model)
+    {
+        using var db = dbFactory.Create();
+        var habitService = db.GetService<HabitService>();
+        var appCtx = db.GetService<ApplicationContext>();
+
+        try
+        {
+            var saved = await habitService.SaveCheckInAsync(appCtx.CurrentUser, model);
+            _checkInsByHabitId[saved.HabitId] = saved;
+            _reasonDrafts[saved.HabitId] = saved.FailureReason ?? string.Empty;
+            _reasonErrors.Remove(saved.HabitId);
+            await LoadCheckInsAndStatsAsync();
+        }
+        catch (ArgumentException ex)
+        {
+            _reasonErrors[model.HabitId] = ex.Message == "Failure reason is required."
+                ? "Укажите причину срыва."
+                : "Не удалось сохранить отметку.";
+        }
+    }
+
+    private async Task MarkCompletedAsync(long habitId)
+    {
+        _reasonEditors.Remove(habitId);
+        _reasonErrors.Remove(habitId);
+
+        var model = new HabitCheckInBlazorModel
+        {
+            HabitId = habitId,
+            CheckInDate = _selectedDate.ToDateTime(TimeOnly.MinValue),
+            IsCompleted = true,
+            FailureReason = null
+        };
+
+        await SaveCheckInAsync(model);
+    }
+
+    private void StartMissedReason(long habitId)
+    {
+        _reasonEditors.Add(habitId);
+        _reasonErrors.Remove(habitId);
+
+        var existing = GetCheckIn(habitId);
+        _reasonDrafts[habitId] = existing?.FailureReason ?? string.Empty;
+    }
+
+    private async Task SaveMissedReasonAsync(long habitId)
+    {
+        if (!_reasonDrafts.TryGetValue(habitId, out var reason) || string.IsNullOrWhiteSpace(reason))
+        {
+            _reasonErrors[habitId] = "Укажите причину срыва.";
+            return;
+        }
+
+        var model = new HabitCheckInBlazorModel
+        {
+            HabitId = habitId,
+            CheckInDate = _selectedDate.ToDateTime(TimeOnly.MinValue),
+            IsCompleted = false,
+            FailureReason = reason
+        };
+
+        await SaveCheckInAsync(model);
+        _reasonEditors.Remove(habitId);
+    }
+
+    private void CancelMissedReason(long habitId)
+    {
+        _reasonEditors.Remove(habitId);
+        _reasonErrors.Remove(habitId);
+    }
+
+    private async Task ChangeDate()
+    {
+        _reasonEditors.Clear();
+        _reasonErrors.Clear();
+        await LoadCheckInsAndStatsAsync();
+    }
+
+    private async Task ChangeDateToPreviousDay()
+    {
+        _selectedDate = _selectedDate.AddDays(-1);
+        _reasonEditors.Clear();
+        _reasonErrors.Clear();
+        await LoadCheckInsAndStatsAsync();
+    }
+
+    private async Task ChangeDateToNextDay()
+    {
+        _selectedDate = _selectedDate.AddDays(1);
+        _reasonEditors.Clear();
+        _reasonErrors.Clear();
+        await LoadCheckInsAndStatsAsync();
+    }
+}

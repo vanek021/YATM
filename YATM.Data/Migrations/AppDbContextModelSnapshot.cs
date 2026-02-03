@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using YATM.Data;
+using YATM.Models.Entities.Health;
 
 #nullable disable
 
@@ -168,11 +169,21 @@ namespace YATM.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsSoftDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -202,6 +213,9 @@ namespace YATM.Data.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsSoftDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -244,12 +258,18 @@ namespace YATM.Data.Migrations
                     b.Property<DateTime?>("ExpireDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("IsSoftDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Geometry>("MapGeometry")
                         .HasColumnType("geometry");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<long>("TaskNumber")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -267,6 +287,286 @@ namespace YATM.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("BoardTasks");
+                });
+
+            modelBuilder.Entity("YATM.Models.Entities.Boards.BoardUsers", b =>
+                {
+                    b.Property<long>("BoardId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsOwner")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("BoardId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("BoardUsers");
+                });
+
+            modelBuilder.Entity("YATM.Models.Entities.Habits.Habit", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsSoftDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Habits");
+                });
+
+            modelBuilder.Entity("YATM.Models.Entities.Habits.HabitCheckIn", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CheckInDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FailureReason")
+                        .HasColumnType("text");
+
+                    b.Property<long>("HabitId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsSoftDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.HasIndex("HabitId", "CheckInDate")
+                        .IsUnique();
+
+                    b.ToTable("HabitCheckIns");
+                });
+
+            modelBuilder.Entity("YATM.Models.Entities.Health.HealthRecord", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("BodyNote")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<HealthSvgData>("HealthSvgData")
+                        .HasColumnType("jsonb");
+
+                    b.Property<bool>("IsSoftDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TemperatureGeneralNote")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("HealthRecords");
+                });
+
+            modelBuilder.Entity("YATM.Models.Entities.Health.TemperatureRecord", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("HealthRecordId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsSoftDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double>("TempValue")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HealthRecordId");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.ToTable("TemperatureRecords");
+                });
+
+            modelBuilder.Entity("YATM.Models.Entities.Notes.Note", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsPinned")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsSoftDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notes");
+                });
+
+            modelBuilder.Entity("YATM.Models.Entities.Notes.NoteNoteTags", b =>
+                {
+                    b.Property<long>("NoteId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("NoteTagId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("NoteId", "NoteTagId");
+
+                    b.HasIndex("NoteTagId");
+
+                    b.ToTable("NoteNoteTags");
+                });
+
+            modelBuilder.Entity("YATM.Models.Entities.Notes.NoteTag", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsSoftDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<long?>("OwnerId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("TextColor")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("NoteTags");
                 });
 
             modelBuilder.Entity("YATM.Models.Entities.User", b =>
@@ -418,14 +718,138 @@ namespace YATM.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("YATM.Models.Entities.Boards.BoardUsers", b =>
+                {
+                    b.HasOne("YATM.Models.Entities.Boards.Board", "Board")
+                        .WithMany("BoardUsers")
+                        .HasForeignKey("BoardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("YATM.Models.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Board");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("YATM.Models.Entities.Habits.Habit", b =>
+                {
+                    b.HasOne("YATM.Models.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("YATM.Models.Entities.Habits.HabitCheckIn", b =>
+                {
+                    b.HasOne("YATM.Models.Entities.Habits.Habit", "Habit")
+                        .WithMany("CheckIns")
+                        .HasForeignKey("HabitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Habit");
+                });
+
+            modelBuilder.Entity("YATM.Models.Entities.Health.HealthRecord", b =>
+                {
+                    b.HasOne("YATM.Models.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("YATM.Models.Entities.Health.TemperatureRecord", b =>
+                {
+                    b.HasOne("YATM.Models.Entities.Health.HealthRecord", "HealthRecord")
+                        .WithMany("TemperatureRecords")
+                        .HasForeignKey("HealthRecordId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("HealthRecord");
+                });
+
+            modelBuilder.Entity("YATM.Models.Entities.Notes.Note", b =>
+                {
+                    b.HasOne("YATM.Models.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("YATM.Models.Entities.Notes.NoteNoteTags", b =>
+                {
+                    b.HasOne("YATM.Models.Entities.Notes.Note", "Note")
+                        .WithMany("NoteNoteTags")
+                        .HasForeignKey("NoteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("YATM.Models.Entities.Notes.NoteTag", "NoteTag")
+                        .WithMany("NoteNoteTags")
+                        .HasForeignKey("NoteTagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Note");
+
+                    b.Navigation("NoteTag");
+                });
+
+            modelBuilder.Entity("YATM.Models.Entities.Notes.NoteTag", b =>
+                {
+                    b.HasOne("YATM.Models.Entities.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId");
+
+                    b.Navigation("Owner");
+                });
+
             modelBuilder.Entity("YATM.Models.Entities.Boards.Board", b =>
                 {
+                    b.Navigation("BoardUsers");
+
                     b.Navigation("Columns");
                 });
 
             modelBuilder.Entity("YATM.Models.Entities.Boards.BoardColumn", b =>
                 {
                     b.Navigation("Tasks");
+                });
+
+            modelBuilder.Entity("YATM.Models.Entities.Habits.Habit", b =>
+                {
+                    b.Navigation("CheckIns");
+                });
+
+            modelBuilder.Entity("YATM.Models.Entities.Health.HealthRecord", b =>
+                {
+                    b.Navigation("TemperatureRecords");
+                });
+
+            modelBuilder.Entity("YATM.Models.Entities.Notes.Note", b =>
+                {
+                    b.Navigation("NoteNoteTags");
+                });
+
+            modelBuilder.Entity("YATM.Models.Entities.Notes.NoteTag", b =>
+                {
+                    b.Navigation("NoteNoteTags");
                 });
 
             modelBuilder.Entity("YATM.Models.Entities.User", b =>

@@ -1,0 +1,210 @@
+﻿@page "/health"
+
+@using YATM.BlazorModels.Health
+@using YATM.Components.Shared;
+@using YATM.Models.Constants;
+@using YATM.Pages.Health.Components
+@using YATM.Services;
+@using YATM.Infrastructure.Extensions;
+
+@attribute [Authorize]
+
+@inject DatabaseFactory dbFactory
+
+<PageTitle>Здоровье</PageTitle>
+
+<div class="row" style="padding-bottom: 10px;">
+    <div class="col-lg-2 col-md-12 col-sm-12 col-12">
+        <div class="d-flex justify-content-center">
+            <DatePicker @bind-Value="_currentDate" TValue="DateOnly" OnChange="ChangeDate" Format="MM/dd/yyyy" />
+        </div>
+    </div>
+    <div class="col-lg-8 col-md-12 col-sm-12 mt-lg-0 mt-md-2 mt-sm-2 mt-2">
+        <div class="d-flex justify-content-center gap-1">
+            <Button OnClick="ChangeDateToPreviousDay" Icon="@IconType.Outline.Left" />
+            <div class="health__date-desc">@_currentDate.GetDateWithDayAndMonthName()</div>
+            <Button OnClick="ChangeDateToNextDay" Icon="@IconType.Outline.Right" />
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-0 col-sm-12 col-12"></div>
+</div>
+
+@if (_currentRecord is not null)
+{
+    <div class="row">
+        <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+            <FullHumanBody DataPositions="_selectedDataPositions"
+                           OnDataPositionsChanged="SaveHealthSvgData" />
+        </div>
+        <div class="col-lg-6 col-md-6 col-sm-12 col-12 mt-lg-0 mt-md-0 mt-sm-4 mt-4">
+            <div style="height: 100%; width: 100%;">
+                <TextArea DebounceMilliseconds="1000"
+                          Style="height: 100%; width: 100%;"
+                          OnChange="UpdateHealthBodyNote"
+                          @bind-Value="_currentRecord!.BodyNote" />
+            </div>
+        </div>
+    </div>
+    <div class="d-flex" style="margin-top: 20px;">
+        <div class="col-temp col-4">
+            <div class="col-temp__header">Температура</div>
+            @if (_currentRecord.TemperatureRecords.Any())
+            {
+                foreach (var tempRecord in _currentRecord.TemperatureRecords)
+                {
+                    <div class="col-temp__entry">
+                        <div>@tempRecord.RecordedAt @tempRecord.TempValue °C</div>
+                        <div>@tempRecord.Note</div>
+                    </div>
+                }
+            }
+            @if (_newTemperatureRecord is not null)
+            {
+                <div>
+                    <EditForm Model="_newTemperatureRecord" OnValidSubmit="SaveTemperatureRecord">
+                        <DataAnnotationsValidator />
+                        <div>
+                            <AntDesign.InputNumber Min="30" Max="45"
+                                                   Style="width: 100%;"
+                                                   CultureInfo="@System.Globalization.CultureInfo.GetCultureInfo("ru-RU")"
+                                                   @bind-Value="_newTemperatureRecord.TempValue" />
+                            <ValidationMessage For="@(() => _newTemperatureRecord.TempValue)" />
+                        </div>
+                        <div>
+                            <TimePicker TValue="TimeOnly"
+                                        Format="HH:mm"
+                                        Style="width: 100%;"
+                                        @bind-Value="_newTemperatureRecord.RecordedAt" />
+                            <ValidationMessage For="@(() => _newTemperatureRecord.RecordedAt)" />
+                        </div>
+                        <div class="d-flex flex-wrap">
+                            <div class="">
+                                <Button HtmlType="submit" Icon="@IconType.Outline.Check" />
+                            </div>
+                            <div class="">
+                                <Button OnClick="CancelCreateNewTempRecord" Type="button" Icon="@IconType.Outline.Close" />
+                            </div>
+                        </div>
+                    </EditForm>
+                </div>
+            }
+        </div>
+        <div class="col-temp col-8">
+            <div class="col-temp__header">Общая заметка</div>
+            <div class="col-temp__note-body">
+                <TextArea DebounceMilliseconds="1000"
+                          OnChange="UpdateTemperatureGeneralNote"
+                          Style="height: 100%; border: none;"
+                          @bind-Value="_currentRecord!.TemperatureGeneralNote" />
+            </div>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col">
+            <Button OnClick="CreateNewTempRecord">Внести температуру</Button>
+        </div>
+    </div>
+}
+
+@code {
+    private DateOnly _currentDate;
+    private HealthRecordBlazorModel? _currentRecord;
+    private TemperatureRecordBlazorModel? _newTemperatureRecord;
+    private HashSet<string> _selectedDataPositions = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _currentDate = DateOnly.FromDateTime(DateTime.UtcNow.ToYektTime());
+        await GetItemsAsync();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task SaveTemperatureRecord()
+    {
+        using var db = dbFactory.Create();
+        var healthService = db.GetService<HealthService>();
+        var appCtx = db.GetService<ApplicationContext>();
+
+        await healthService.SaveTemperatureRecordForAsync(appCtx.CurrentUser, _currentRecord!.Id, _newTemperatureRecord!);
+        await GetItemsAsync();
+
+        _newTemperatureRecord = null;
+    }
+
+    private async Task GetItemsAsync()
+    {
+        using var db = dbFactory.Create();
+        var healthService = db.GetService<HealthService>();
+        var appCtx = db.GetService<ApplicationContext>();
+
+        _currentRecord = await healthService.GetOrCreateHealthRecordForAsync(appCtx.CurrentUser, _currentDate);
+        _selectedDataPositions = _currentRecord.HealthSvgData?.SelectedDataPositions ?? new HashSet<string>();
+    }
+
+    private void CreateNewTempRecord()
+    {
+        var yektTime = DateTime.UtcNow.ToYektTime();
+
+        _newTemperatureRecord = new TemperatureRecordBlazorModel()
+            {
+                RecordedAt = TimeOnly.FromDateTime(yektTime),
+                RecordedAtDate = DateOnly.FromDateTime(yektTime),
+                TempValue = 36.6
+            };
+        StateHasChanged();
+    }
+
+    private void CancelCreateNewTempRecord()
+    {
+        _newTemperatureRecord = null;
+        StateHasChanged();
+    }
+
+    private async Task ChangeDate()
+    {
+        StateHasChanged();
+        await GetItemsAsync();
+    }
+
+    private async Task ChangeDateToPreviousDay()
+    {
+        _currentDate = _currentDate.AddDays(-1);
+        await GetItemsAsync();
+    }
+
+    private async Task ChangeDateToNextDay()
+    {
+        _currentDate = _currentDate.AddDays(1);
+        await GetItemsAsync();
+    }
+
+    private async Task UpdateTemperatureGeneralNote()
+    {
+        using var db = dbFactory.Create();
+        var appCtx = db.GetService<ApplicationContext>();
+        var healthService = db.GetService<HealthService>();
+
+        await healthService.SaveTemperatureGeneralNote(appCtx.CurrentUser, _currentRecord!);
+    }
+
+    private async Task UpdateHealthBodyNote()
+    {
+        using var db = dbFactory.Create();
+        var appCtx = db.GetService<ApplicationContext>();
+        var healthService = db.GetService<HealthService>();
+
+        await healthService.SaveHealthBodyNote(appCtx.CurrentUser, _currentRecord!);
+    }
+
+    private async Task SaveHealthSvgData()
+    {
+        using var db = dbFactory.Create();
+        var appCtx = db.GetService<ApplicationContext>();
+        var healthService = db.GetService<HealthService>();
+
+        _currentRecord!.HealthSvgData = _currentRecord!.HealthSvgData ?? new Models.Entities.Health.HealthSvgData();
+        _currentRecord!.HealthSvgData.SelectedDataPositions = _selectedDataPositions;
+
+        await healthService.SaveHealthSvgData(appCtx.CurrentUser, _currentRecord!);
+    }
+}

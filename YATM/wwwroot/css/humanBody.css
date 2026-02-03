@@ -1,0 +1,109 @@
+﻿.human-body {
+    display: flex;
+    justify-content: center;
+}
+
+    .human-body svg:hover {
+        cursor: pointer;
+    }
+
+    .human-body svg {
+    }
+
+        .human-body svg#head {
+            margin-left: -28.5px;
+            top: -6px;
+        }
+
+        .human-body svg#left-shoulder {
+            margin-left: -53.5px;
+            top: 69px;
+        }
+
+        .human-body svg#right-shoulder {
+            margin-left: 13.5px;
+            top: 69px;
+        }
+
+        .human-body svg#left-arm {
+            margin-left: -78px;
+            top: 112px;
+        }
+
+        .human-body svg#right-arm {
+            margin-left: 38px;
+            top: 112px;
+            z-index: 10001;
+        }
+
+        .human-body svg#chest {
+            margin-left: -43.5px;
+            top: 88px;
+        }
+
+        .human-body svg#stomach {
+            margin-left: -37.5px;
+            top: 130px;
+        }
+
+        .human-body svg#left-leg {
+            margin-left: -46.5px;
+            top: 205px;
+            z-index: 9999;
+        }
+
+        .human-body svg#right-leg {
+            margin-left: 1.5px;
+            top: 205px;
+            z-index: 9999;
+        }
+
+        .human-body svg#left-hand {
+            margin-left: -102.5px;
+            top: 224px;
+        }
+
+        .human-body svg#right-hand {
+            margin-left: 66.5px;
+            top: 224px;
+            z-index: 10000;
+        }
+
+        .human-body svg#left-foot {
+            margin-left: -35.5px;
+            top: 455px;
+        }
+
+        .human-body svg#right-foot {
+            margin-left: 5.5px;
+            top: 455px;
+        }
+
+@media (hover: hover) and (pointer: fine) {
+    .human-body path:hover:active:not(.wrapper) {
+        fill: #db8b35;
+    }
+
+    .human-body g:hover {
+        fill: #db8b35;
+    }
+}
+
+#area {
+    display: block;
+    width: 100%;
+    clear: both;
+    padding: 10px;
+    text-align: center;
+    font-size: 25px;
+    font-family: Courier New;
+    color: #a5a5a5;
+}
+
+    #area #data {
+        color: black;
+    }
+
+.human-body .part__selected {
+    fill: #db8b35 !important;
+}

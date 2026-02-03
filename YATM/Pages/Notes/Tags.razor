@@ -1,0 +1,97 @@
+﻿@page "/notes/notetags"
+
+@using YATM.BlazorModels.Notes.NoteTags
+@using YATM.Pages.Notes.Components
+@using YATM.Services
+
+@attribute [Authorize]
+
+@inject DatabaseFactory dbFactory
+
+<PageTitle>Теги заметок</PageTitle>
+
+<Flex Style="padding-bottom: 10px;">
+    <div style="margin-right: 20px;">
+        <a href="/notes">
+            <Button Icon="@IconType.Outline.ArrowLeft">
+                Назад
+            </Button>
+        </a>
+    </div>
+    <div>
+        <Button OnClick="OnCreateClick" Icon="@IconType.Outline.Plus">
+            Создать
+        </Button>
+    </div>
+</Flex>
+
+<Flex Style="gap: 20px; column-gap: 20px;" Justify="space-evenly" Wrap="wrap">
+    @if (_noteTags != null && _noteTags.Any())
+    {
+
+        <div class="notetag__container-outer">
+            <div class="notetag__container-outer-title">Теги заметок</div>
+            <div class="notetag__container-inner">
+                @foreach (var noteTag in _noteTags)
+                {
+                    <div class="notetag__container" @onclick="@(_ => SelectTag(noteTag))">
+                        <div class="notetag__label">Название: @noteTag.Name</div>
+                        <div class="notetag__label">
+                            Цвет: @noteTag.Color <span class="notetags__color-small" style="background-color: @noteTag.Color;"></span>
+                        </div>
+                        <div class="notetag__label">Порядок: @noteTag.Order</div>
+                    </div>
+                }
+            </div>
+        </div>
+        @if (_selectedTag != null)
+        {
+            <div class="notetag__edit-area">
+                <div class="notetag__container-outer-title">Правка тега</div>
+                <TagCreateEdit NoteTag="_selectedTag" OnSave="GetItemsAsync" />
+            </div>
+        }
+    }
+</Flex>
+
+@code {
+    private List<NoteTagBlazorModel> _noteTags = new();
+    private NoteTagBlazorModel? _selectedTag = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetItemsAsync();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task GetItemsAsync()
+    {
+        using var db = dbFactory.Create();
+        var noteService = db.GetService<NoteService>();
+        var appCtx = db.GetService<ApplicationContext>();
+        _noteTags = await noteService.GetNoteTags(appCtx.CurrentUser);
+        _selectedTag = null;
+    }
+
+    private void SelectTag(NoteTagBlazorModel noteTag)
+    {
+        if (_selectedTag != null && _selectedTag.Id == noteTag.Id)
+        {
+            _selectedTag = null;
+        }
+        else
+        {
+            _selectedTag = noteTag;
+        }
+
+        StateHasChanged();
+    }
+
+    private void OnCreateClick()
+    {
+        _selectedTag = new();
+        _selectedTag.Color = "#000000";
+        _selectedTag.TextColor = "#ffffff";
+        StateHasChanged();
+    }
+}

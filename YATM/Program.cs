@@ -43,6 +43,9 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
 builder.Services.AddScoped<BoardService>();
+builder.Services.AddScoped<NoteService>();
+builder.Services.AddScoped<HealthService>();
+builder.Services.AddScoped<HabitService>();
 
 builder.Services.AddScoped<IAuthenticationStateAccessor, AuthenticationStateAccessor>();
 builder.Services.AddScoped<ApplicationContext>();
@@ -82,6 +85,7 @@ app.MapFallbackToPage("/_Host");
 
 UserSeeds.Initialize(app.Services);
 BoardSeeds.Initialize(app.Services);
+NoteTagSeeds.Initialize(app.Services);
 
 if (app.Environment.IsProduction())
 {

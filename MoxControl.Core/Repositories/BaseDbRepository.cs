@@ -22,6 +22,12 @@ namespace YATM.Core.Repositories
             return _context.Set<T>();
         }
 
+        protected virtual IQueryable<TEntity> TableReadOnly<TEntity>()
+            where TEntity : class, IEntity
+        {
+            return _context.Set<TEntity>().AsNoTracking();
+        }
+
         // IQueryable methods should be always "protected"!
         protected virtual IQueryable<T> SingleWithIncludes()
         {

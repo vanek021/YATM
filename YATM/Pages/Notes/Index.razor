@@ -1,0 +1,171 @@
+﻿@page "/notes"
+
+@using YATM.BlazorModels.Notes;
+@using YATM.BlazorModels.Notes.NoteTags
+@using YATM.Components.Shared;
+@using YATM.Models.Constants;
+@using YATM.Pages.Index.Components;
+@using YATM.Pages.Notes.Components;
+@using YATM.Services;
+
+@attribute [Authorize]
+
+@inject DatabaseFactory dbFactory
+
+<PageTitle>Заметки</PageTitle>
+
+<NoteCreateEditModal @ref="noteCreateEditModal" Note="noteCreateEdit" OKCallback="OnModalConfirmAsync" />
+<ConfirmationModal @ref="deleteConfirmation" OnCancel="CancelDeleting" OnConfirm="@(_ => OnDeleteConfirmedAsync(deleteDraft!.Id))">
+    <div>Удалить заметку "@deleteDraft?.Title"?</div>
+</ConfirmationModal>
+<Flex Style="padding-bottom: 10px;">
+    <div>
+        <Button OnClick="OnCreateClickAsync" Icon="@IconType.Outline.Plus">
+            Создать
+        </Button>
+    </div>
+    <NoteTagSelect @ref="noteTagSelect"
+                   OnSelectedItemsChanged="OnSelectedTagsChanged"
+                   Style="width: 500px; margin-left: 20px;" />
+    <a href="/notes/notetags"><Button><Icon Type="edit" Theme="outline" /></Button></a>
+</Flex>
+<Flex Justify="space-evenly" Wrap="wrap">
+    @foreach (var note in Notes)
+    {
+        <div style="width: 380px; margin:10px;">
+            <Card>
+                <TitleTemplate>
+                    <div>@note.Title</div>
+                    @foreach (var tag in note.NoteTags.OrderBy(nt => nt.Order))
+                    {
+                        <Tag Color="@tag.Color">@tag.Name</Tag>
+                    }
+                </TitleTemplate>
+                <Extra>
+                    <Button Icon="@IconType.Outline.Delete" @onclick=@(_ => OnShowDeleteConfirmation(note)) />
+                    <Button Icon="@IconType.Outline.Edit" @onclick=@(_ => OnEditClickAsync(note.Id)) />
+                    @if (note.IsPinned)
+                    {
+                        <Button Class="ant-btn-icon-only" @onclick=@(_ => OnPinClickAsync(note)) NoSpanWrap>
+                            <Icon Type="pushpin" Theme="fill" />
+                        </Button>
+                    }
+                    else
+                    {
+                        <Button Class="ant-btn-icon-only" @onclick=@(_ => OnPinClickAsync(note)) NoSpanWrap>
+                            <Icon Type="pushpin" Theme="outline" Class="anticon anticon-pushpin" />
+                        </Button>
+                    }
+                </Extra>
+                <Body>
+                    @((MarkupString)note.Content)
+                </Body>
+            </Card>
+        </div>
+    }
+</Flex>
+
+@code {
+    private List<NoteBlazorModel> Notes { get; set; } = new();
+    private List<NoteTagBlazorModel> NoteTags { get; set; } = new();
+    private NoteBlazorModel? noteCreateEdit;
+    private NoteCreateEditModal? noteCreateEditModal;
+    private NoteBlazorModel? deleteDraft;
+    private ConfirmationModal? deleteConfirmation;
+    private NoteTagSelect? noteTagSelect;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var db = dbFactory.Create();
+        var noteService = db.GetService<NoteService>();
+        var appCtx = db.GetService<ApplicationContext>();
+
+        NoteTags = await noteService.GetNoteTags(appCtx.CurrentUser);
+
+        await GetItemsAsync();
+
+        await base.OnInitializedAsync();
+    }
+
+    private void CancelDeleting()
+    {
+        deleteConfirmation?.Hide();
+        deleteDraft = null;
+    }
+
+    private async Task GetItemsAsync()
+    {
+        using var db = dbFactory.Create();
+        var noteService = db.GetService<NoteService>();
+        var appCtx = db.GetService<ApplicationContext>();
+        Notes = await noteService.GetNoteBlazorModelsByUserAsync(appCtx.CurrentUser, noteTagSelect?.GetSelectedIds()?.ToList());
+        StateHasChanged();
+    }
+
+    private async Task OnCreateClickAsync()
+    {
+        noteCreateEdit = new();
+        noteCreateEditModal!.InitTags(Enumerable.Empty<long>());
+        noteCreateEditModal.OpenModal();
+    }
+
+    private async Task OnEditClickAsync(long id)
+    {
+        noteCreateEdit = Notes.First(n => n.Id == id);
+        noteCreateEditModal!.InitTags(noteCreateEdit.NoteTags.Select(n => n.Id));
+        noteCreateEditModal.OpenModal();
+    }
+
+    private async Task OnPinClickAsync(NoteBlazorModel model)
+    {
+        model.IsPinned = !model.IsPinned;
+
+        using var db = dbFactory.Create();
+        var noteService = db.GetService<NoteService>();
+        await noteService.PinNoteAsync(model);
+
+        await GetItemsAsync();
+        StateHasChanged();
+    }
+
+    private void OnShowDeleteConfirmation(NoteBlazorModel model)
+    {
+        deleteDraft = model;
+        deleteConfirmation?.Show();
+    }
+
+    private async Task OnDeleteConfirmedAsync(long id)
+    {
+        deleteConfirmation?.Hide();
+
+        if (deleteDraft == null)
+            return;
+
+        using var db = dbFactory.Create();
+        var noteService = db.GetService<NoteService>();
+        await noteService.DeleteNoteAsync(id);
+
+        await GetItemsAsync();
+        StateHasChanged();
+    }
+
+    private async Task OnModalConfirmAsync()
+    {
+        using var db = dbFactory.Create();
+        var noteService = db.GetService<NoteService>();
+
+        if (noteCreateEdit!.Id == default)
+            await noteService.CreateNoteAsync(noteCreateEdit);
+        else
+            await noteService.UpdateNoteAsync(noteCreateEdit);
+
+        await GetItemsAsync();
+        StateHasChanged();
+    }
+
+    private async Task OnSelectedTagsChanged(IEnumerable<NoteTagBlazorModel> values)
+    {
+        await GetItemsAsync();
+        StateHasChanged();
+    }
+}

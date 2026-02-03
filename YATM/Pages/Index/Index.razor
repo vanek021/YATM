@@ -1,48 +1,83 @@
 ﻿@page "/"
+@page "/{BoardName}"
 
 @using YATM.BlazorModels.Boards;
-@using YATM.Factories;
+@using YATM.Components.Shared
+@using YATM.Infrastructure.Extensions
 @using YATM.Models.Constants;
+@using YATM.Pages.Index.Components
 @using YATM.Services;
 
 @attribute [Authorize]
 
 @inject DatabaseFactory dbFactory
 
-<PageTitle>@ActiveBoard?.Name</PageTitle>
+<PageTitle>@_activeBoard?.Name</PageTitle>
 
-@if (ActiveBoard is null)
+@if (_activeBoard is null)
 {
     <Spin Size="Large" />
 }
 else
 {
-    <table class="table">
+    <TaskCreateEditModal @ref="_taskCreateEditModal" Task="_createEditTask" Columns="_activeBoard.Columns" OnOK="GetItemsAsync" />
+    <BoardCreateEditModal @ref="_boardCreateEditModal" Board="_createEditBoard" OnOK="OnBoardCreateEdit" />
+    <h1>@_activeBoard.Name</h1>
+    <Flex Gap="small" Style="padding-bottom: 10px;">
+        <div>
+            <Button OnClick="OpenBoardCreateModal" Icon="@IconType.Outline.Plus">
+                Создать доску
+            </Button>
+        </div>
+        <div class="board-select">
+            <Select @bind-Value="_activeBoardId"
+            TItem="BoardShortBlazorModel"
+            TItemValue="long?"
+            LabelName="@nameof(BoardShortBlazorModel.Name)"
+            ValueName="@nameof(BoardShortBlazorModel.Id)"
+            OnSelectedItemChanged="GetItemsAsync"
+            DataSource="_boards" />
+        </div>
+        <div>
+            <Button Danger OnClick="OnBoardDelete" Icon="@IconType.Outline.Delete"></Button>
+        </div>
+    </Flex>
+    <table class="table board-table">
         <thead>
             <tr>
-                @foreach (var column in ActiveBoard.Columns)
+                @foreach (var col in _activeBoard.Columns)
                 {
-                    <th>@column.Name</th>
+                    <th scope="col">@col.Name @(col.Tasks.Any() ? $"({col.Tasks.Count})" : "")</th>
                 }
             </tr>
         </thead>
         <tbody>
             <tr>
-                @foreach (var column in ActiveBoard.Columns)
+                @foreach (var col in _activeBoard.Columns)
                 {
-                    <td>
-                        <Button>Новая карточка</Button>
-                    </td>
-                }
-            </tr>
-            <tr>
-                @foreach (var column in ActiveBoard.Columns)
-                {
-                    <td>
-                        @foreach (var task in column.Tasks)
+                    <td scope="row">
+                        @foreach (var task in col.Tasks)
                         {
-                            <div>@task.Name</div>
+                            <div class="board-task">
+                                <div class="board-task__name" @ondblclick="@(_ => OpenTaskEditModal(task))">
+                                    <span class="board-task__task-id">@_activeBoard.Code-@task.TaskNumber</span> @task.Name
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <div class="board-task__expire-date">
+                                        @if (task.ExpireDate is not null)
+                                        {
+                                            <div>@task.ExpireDate.GetDateOnly()</div>
+                                        }
+                                    </div>
+                                    <div class="board-task__avatar">
+                                        <YATM.Components.Shared.Avatar User="task.User" />
+                                    </div>
+                                </div>
+                            </div>
                         }
+                        <div class="board-task__create">
+                            <Button OnClick="OpenTaskCreateModal">Создать..</Button>
+                        </div>
                     </td>
                 }
             </tr>
@@ -50,18 +85,100 @@ else
     </table>
 }
 
+<ConfirmationModal Title="Удаление доски"
+@ref="_boardDeleteConfirmationModal"
+OnConfirm="OnBoardDeleteConfirm"
+OnCancel="OnBoardDeleteCancel">
+    Вы действительно хотите удалить доску @_activeBoard?.Name?
+</ConfirmationModal>
+
 @code {
-    public List<BoardBlazorModel> Boards { get; set; } = new();
-    public BoardBlazorModel ActiveBoard { get; set; }
+    [Parameter]
+    public string? BoardName { get; set; }
+
+    private List<BoardShortBlazorModel> _boards { get; set; } = new();
+    private long? _activeBoardId;
+    private BoardBlazorModel? _activeBoard { get; set; }
+    private TaskCreateEditModal? _taskCreateEditModal;
+    private BoardTaskBlazorModel? _createEditTask;
+    private BoardBlazorModel? _createEditBoard;
+    private BoardCreateEditModal? _boardCreateEditModal;
+    private ConfirmationModal? _boardDeleteConfirmationModal;
 
     protected override async Task OnInitializedAsync()
     {
-        using var db = dbFactory.Create();
-        var boardService = db.GetService<BoardService>();
+        await GetBoardsAsync();
+        await GetItemsAsync();
 
-        Boards = await boardService.GetBoardBlazorModelsAsync();
-        ActiveBoard = await boardService.GetBoardBlazorModelByNameAsync(BoardConstants.MainBoard);
+        _activeBoardId = _activeBoard.Id;
 
         await base.OnInitializedAsync();
+    }
+
+    private async Task GetBoardsAsync()
+    {
+        using var db = dbFactory.Create();
+        var boardService = db.GetService<BoardService>();
+        var appCtx = db.GetService<ApplicationContext>();
+
+        _boards = await boardService.GetBoardBlazorModelsAsync(appCtx.CurrentUser.Id);
+    }
+
+    private async Task GetItemsAsync()
+    {
+        using var db = dbFactory.Create();
+        var boardService = db.GetService<BoardService>();
+        var appCtx = db.GetService<ApplicationContext>();
+
+        _activeBoard = await boardService.GetBoardBlazorModelByIdOrDefaultAsync(_activeBoardId, appCtx.CurrentUser.Id);
+    }
+
+    private void OpenTaskEditModal(BoardTaskBlazorModel task)
+    {
+        _createEditTask = task;
+        _taskCreateEditModal!.OpenModal();
+    }
+
+    private void OpenTaskCreateModal()
+    {
+        _createEditTask = new BoardTaskBlazorModel()
+            {
+                BoardColumnId = _activeBoard.Columns.OrderBy(c => c.Order).First().Id
+            };
+
+        _taskCreateEditModal!.OpenModal();
+    }
+
+    private void OpenBoardCreateModal()
+    {
+        _createEditBoard = new BoardBlazorModel();
+        _boardCreateEditModal!.OpenModal();
+    }
+
+    private async Task OnBoardCreateEdit()
+    {
+        await GetBoardsAsync();
+        _activeBoardId = _createEditBoard!.Id;
+        await GetItemsAsync();
+    }
+
+    private async Task OnBoardDelete()
+    {
+        _boardDeleteConfirmationModal!.Show();
+    }
+
+    private async Task OnBoardDeleteConfirm()
+    {
+        using var db = dbFactory.Create();
+        var boardService = db.GetService<BoardService>();
+        await boardService.DeleteBoardAsync(_activeBoard!.Id);
+        _boardDeleteConfirmationModal!.Hide();
+        _activeBoardId = null;
+        await OnInitializedAsync();
+    }
+
+    private async Task OnBoardDeleteCancel()
+    {
+        _boardDeleteConfirmationModal!.Hide();
     }
 }

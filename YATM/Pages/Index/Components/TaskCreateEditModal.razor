@@ -1,27 +1,90 @@
 ﻿@using YATM.BlazorModels.Boards;
-@using YATM.Factories;
+@using YATM.Services
 
 @inject DatabaseFactory dbFactory
 
-<Modal>
-
+<Modal Visible="visible" Closable="false" Centered="true" OnOk="OnOKClicked" OnCancel="OnCancelClicked" Title="@Task?.Name">
+    <Form Model="Task">
+        <FormItem>
+            <Button Danger OnClick="DeleteTask" Icon="@IconType.Outline.Delete" />
+        </FormItem>
+        <FormItem>
+            <Input Placeholder="Название" @bind-Value="@Task!.Name" />
+        </FormItem>
+        <FormItem>
+            <Select @bind-Value="Task!.BoardColumnId"
+                    LabelName="@nameof(BoardColumnBlazorModel.Name)"
+                    ValueName="@nameof(BoardColumnBlazorModel.Id)"
+                    TItem="BoardColumnBlazorModel"
+                    TItemValue="long" 
+                    DataSource="Columns" />
+        </FormItem>
+        <FormItem>
+            <DatePicker Style="width: 100%;" Placeholder="@("Срок выполнения")" @bind-Value="@Task!.ExpireDate" Format="dd/MM/yyyy" />
+        </FormItem>
+        <FormItem>
+            <TinyMCE.Blazor.Editor ApiKey="8x4if75v87gl8oelediq72dnb2yomjxelaonbn6p2nyictgk"
+                                   Field="() => Task!.Description"
+                                   @bind-Value="Task!.Description" />
+        </FormItem>
+    </Form>
 </Modal>
 
 @code {
+    [Parameter]
     public BoardTaskBlazorModel? Task { get; set; }
+
+    [Parameter]
+    public List<BoardColumnBlazorModel> Columns { get; set; } = new();
+
+    [Parameter]
+    public EventCallback OnOK { get; set; }
+
+    private bool visible = false;
 
     public void OpenModal()
     {
-
+        visible = true;
+        StateHasChanged();
     }
 
-    public void OpenModal(long taskId)
+    private async Task OnOKClicked()
     {
+        using var db = dbFactory.Create();
+        var boardService = db.GetService<BoardService>();
+        var appCtx = db.GetService<ApplicationContext>();
 
+        Task!.User = appCtx.CurrentUser;
+
+        if (Task!.Id == default)
+            await boardService.CreateTaskAsync(Task);
+        else
+            await boardService.UpdateTaskAsync(Task);
+
+        if (OnOK.HasDelegate)
+            await OnOK.InvokeAsync();
+
+        visible = false;
+        StateHasChanged();
     }
 
-    public void HideModal()
+    private void OnCancelClicked()
     {
-        Task = null;
+        visible = false;
+        StateHasChanged();
+    }
+
+    private async Task DeleteTask()
+    {
+        using var db = dbFactory.Create();
+        var boardService = db.GetService<BoardService>();
+
+        await boardService.DeleteTaskAsync(Task!.Id);
+
+        if (OnOK.HasDelegate)
+            await OnOK.InvokeAsync();
+        
+        visible = false;
+        StateHasChanged();
     }
 }

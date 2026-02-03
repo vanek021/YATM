@@ -1,21 +1,48 @@
-﻿@inherits LayoutComponentBase
+@using YATM.Components.Shared
+@inherits LayoutComponentBase
 
 @inject AuthenticationStateProvider authenticationStateProvider
 @inject NavigationManager navManager
 
 <PageTitle>YATM</PageTitle>
 
-<Layout Class="layout">
-    <Header>
-        <div class="logo" />
-        <Menu Theme="MenuTheme.Dark" Mode="MenuMode.Horizontal" DefaultSelectedKeys=@(new[]{"1"})>
-            <MenuItem Key="1">Доски</MenuItem>
-        </Menu>
-    </Header>
-    <Content>
+<Layout>
+    <header Class="header">
+        <div class="content">
+            <div class="logo" />
+            <div class="header__menu">
+                <div class="navigation @NavMenuCssClass" @onclick="ToggleNavMenu">
+                    <nav class="menu">
+                        <NavLink class="menu__item" href="" Match="NavLinkMatch.All">
+                            Доски
+                        </NavLink>
+                        <NavLink class="menu__item" href="notes">
+                            Заметки
+                        </NavLink>
+                        <NavLink class="menu__item" href="health">
+                            Здоровье
+                        </NavLink>
+                        <NavLink class="menu__item" href="habits">
+                            Привычки
+                        </NavLink>
+                        <SimpleTimer />
+                    </nav>
+                </div>
+
+                <div class="hamburger" @onclick="ToggleNavMenu">
+                    <div class="svg-icon icon-hamburger">
+                        <div style="color: white;">
+                            <Icon Width="26px" Height="26px" Type="menu" Theme="outline" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <Content Class="content" Style="overflow: auto;">
         <div class="site-layout-content">@Body</div>
     </Content>
-    <Footer Style="text-align: center; color: white; background-color: #001529;">YATM - Yet Another Task Manager - Еще один менеджер задач!</Footer>
+    <Footer Class="footer">YATM - Yet Another Task Manager - Еще один менеджер задач!</Footer>
 </Layout>
 
 <style>
@@ -29,6 +56,11 @@
 </style>
 
 @code {
+
+    private bool _collapseNavMenu = true;
+
+    private string? NavMenuCssClass => _collapseNavMenu ? "collapse" : "menu-open";
+
     protected override async Task OnInitializedAsync()
     {
         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
@@ -37,5 +69,10 @@
         if (user.Identity is null || !user.Identity.IsAuthenticated)
             navManager.NavigateTo("/Identity/Account/Login");
         await base.OnInitializedAsync();
+    }
+
+    private void ToggleNavMenu()
+    {
+        _collapseNavMenu = !_collapseNavMenu;
     }
 }

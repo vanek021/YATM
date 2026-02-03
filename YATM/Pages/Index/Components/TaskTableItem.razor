@@ -1,0 +1,45 @@
+﻿@inject DatabaseFactory dbFactory
+
+@using YATM.BlazorModels.Boards;
+@using YATM.Services;
+
+<TaskCreateEditModal Task="Task" @ref="TaskCreateEditModal" />
+
+<div class="board-task">
+    <div class="board-task__title">
+        <span>@Task.Name</span>
+    </div>
+    <div class="board-task__desc">
+        @Task.Description
+    </div>
+    <div class="board-task__actions">
+        <Button OnClick="DeleteTaskAsync">Удалить</Button>
+        <Button OnClick="EditTaskAsync">Редактировать</Button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public BoardTaskBlazorModel Task { get; set; }
+
+    [Parameter]
+    public EventCallback ItemChangedCallback { get; set; }
+
+    private TaskCreateEditModal? TaskCreateEditModal { get; set; }
+
+    private async Task DeleteTaskAsync()
+    {
+        using var db = dbFactory.Create();
+
+        var boardService = db.GetService<BoardService>();
+
+        await boardService.DeleteTaskAsync(Task.Id);
+
+        await ItemChangedCallback.InvokeAsync();
+    }
+
+    private async Task EditTaskAsync()
+    {
+        TaskCreateEditModal?.OpenModal();
+    }
+}
