@@ -1,4 +1,5 @@
 using Hangfire;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using YATM.Core.Extensions;
 using YATM.Core.Models;
@@ -85,5 +86,12 @@ app.MapFallbackToPage("/_Host");
 UserSeeds.Initialize(app.Services);
 BoardSeeds.Initialize(app.Services);
 NoteTagSeeds.Initialize(app.Services);
+
+if (app.Environment.IsProduction())
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
 app.Run();
