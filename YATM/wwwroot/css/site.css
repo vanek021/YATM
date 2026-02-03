@@ -386,3 +386,158 @@ a, .btn-link {
 .board-task__expire-date {
     color: gray;
 }
+
+.habits-toolbar {
+    margin-bottom: 20px;
+}
+
+.habit-date-nav {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    align-items: center;
+}
+
+.habit-date-label {
+    height: 32px;
+    line-height: 32px;
+    border: 1px solid #d9d9d9;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.habits-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.habit-card {
+    border: 1px solid #f0f0f0;
+    padding: 16px;
+    border-radius: 6px;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.habit-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.habit-card__title {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.habit-card__actions button {
+    margin-left: 6px;
+}
+
+.habit-card__description {
+    color: #555;
+}
+
+.habit-card__status {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.habit-card__controls {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.habit-card__reason {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 10px;
+}
+
+.habit-card__reason-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.habit-card__reason-view {
+    border-top: 1px solid #f0f0f0;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.habit-card__reason-title {
+    font-weight: 600;
+}
+
+.habit-card__reason-text {
+    color: #333;
+}
+
+.habit-card__error {
+    color: #d32f2f;
+    font-size: 13px;
+}
+
+.habit-empty {
+    padding: 20px 0;
+    color: #666;
+}
+
+.habit-reasons {
+    margin-top: 30px;
+}
+
+.habit-reasons__subtitle {
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.habit-reasons__chart {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.habit-reasons__row {
+    display: grid;
+    grid-template-columns: minmax(120px, 220px) 1fr auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.habit-reasons__label {
+    font-weight: 500;
+}
+
+.habit-reasons__bar {
+    height: 10px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.habit-reasons__fill {
+    height: 100%;
+    background-color: #ff7875;
+}
+
+.habit-reasons__count {
+    font-weight: 600;
+}
+
+.habit-reasons__empty {
+    color: #777;
+    padding: 10px 0;
+}

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.Runtime.CompilerServices;
 using YATM.Core.Attributes;
 using YATM.Core.Repositories;
@@ -11,7 +11,8 @@ namespace YATM.Data
     public class Database : AbstractDatabase
     {
         public Database(DbContext context, BoardRepository boardRepo, BoardTaskRepository boardTaskRepo, NoteRepository noteRepo,
-            NoteTagRepository noteTagRepo, HealthRecordRepository healthRecordRepo, TemperatureRecordRepository temperatureRecordRepo) : base(context)
+            NoteTagRepository noteTagRepo, HealthRecordRepository healthRecordRepo, TemperatureRecordRepository temperatureRecordRepo,
+            HabitRepository habitRepo, HabitCheckInRepository habitCheckInRepo) : base(context)
         {
             Boards = boardRepo;
             BoardTasks = boardTaskRepo;
@@ -19,6 +20,8 @@ namespace YATM.Data
             NoteTags = noteTagRepo;
             HealthRecords = healthRecordRepo;
             TemperatureRecords = temperatureRecordRepo;
+            Habits = habitRepo;
+            HabitCheckIns = habitCheckInRepo;
         }
 
         public BoardRepository Boards { get; private set; }
@@ -27,5 +30,7 @@ namespace YATM.Data
         public NoteTagRepository NoteTags { get; private set; }
         public HealthRecordRepository HealthRecords { get; private set; }
         public TemperatureRecordRepository TemperatureRecords { get; private set; }
+        public HabitRepository Habits { get; private set; }
+        public HabitCheckInRepository HabitCheckIns { get; private set; }
     }
 }
