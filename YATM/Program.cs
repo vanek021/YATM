@@ -83,7 +83,6 @@ app.MapBlazorHub();
 
 app.MapFallbackToPage("/_Host");
 
-UserSeeds.Initialize(app.Services);
 BoardSeeds.Initialize(app.Services);
 NoteTagSeeds.Initialize(app.Services);
 
