@@ -1,4 +1,4 @@
-﻿@using System.Timers;
+@using System.Timers;
 
 <div class="timer">
     <div class="timer__elapsed">
@@ -15,6 +15,7 @@
     private string? timeElapsed;
     private Timer? timer;
     private DateTime startTime;
+    private TimeSpan elapsedBeforePause = TimeSpan.Zero;
 
     protected override Task OnInitializedAsync()
     {
@@ -27,7 +28,7 @@
     {
         if (!isRunning)
         {
-            startTime = DateTime.Now;
+            startTime = DateTime.Now - elapsedBeforePause;
             timer = new Timer(1000);
             timer.Elapsed += OnTimerElapsed;
             timer.Start();
@@ -41,11 +42,15 @@
         {
             timer.Stop();
             timer.Dispose();
+            timer = null;
+            elapsedBeforePause = DateTime.Now - startTime;
+            timeElapsed = elapsedBeforePause.ToString(@"hh\:mm\:ss");
             isRunning = false;
         }
         else
         {
-            timeElapsed = "00:00:00";
+            elapsedBeforePause = TimeSpan.Zero;
+            timeElapsed = defaultElapsedLabel;
         }
     }
 
