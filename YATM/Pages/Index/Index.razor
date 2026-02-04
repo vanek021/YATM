@@ -58,8 +58,10 @@ else
                     <td scope="row"
                         class="board-column @(GetColumnDragClass(col.Id))"
                         @ondragenter="@(() => OnColumnDragEnter(col.Id))"
+                        @ondragover="@(() => OnColumnDragOver(col.Id))"
                         @ondragover:preventDefault="true"
-                        @ondrop="@(() => OnTaskDrop(col))">
+                        @ondrop="@(() => OnTaskDrop(col))"
+                        @ondrop:preventDefault="true">
                         @foreach (var task in col.Tasks)
                         {
                             <div class="board-task"
@@ -209,6 +211,15 @@ OnCancel="OnBoardDeleteCancel">
             return;
 
         _dragOverColumnId = columnId;
+    }
+
+    private void OnColumnDragOver(long columnId)
+    {
+        if (_draggedTask is null)
+            return;
+
+        if (_dragOverColumnId != columnId)
+            _dragOverColumnId = columnId;
     }
 
     private string GetColumnDragClass(long columnId)
