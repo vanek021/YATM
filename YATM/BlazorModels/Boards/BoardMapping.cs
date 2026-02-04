@@ -16,7 +16,8 @@ namespace YATM.BlazorModels.Boards
             CreateMap<BoardColumn, BoardColumnBlazorModel>();
             CreateMap<BoardColumnBlazorModel, BoardColumn>();
 
-            CreateMap<BoardTask, BoardTaskBlazorModel>();
+            CreateMap<BoardTask, BoardTaskBlazorModel>()
+                .ForMember(dest => dest.User, opt => opt.Ignore());
             CreateMap<BoardTaskBlazorModel, BoardTask>();
         }
     }
