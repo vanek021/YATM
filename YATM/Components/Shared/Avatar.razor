@@ -1,4 +1,5 @@
-﻿@using YATM.Infrastructure.Extensions
+﻿@using YATM.BlazorModels.Users
+@using YATM.Infrastructure.Extensions
 @using YATM.Models.Entities
 
 @if (User is not null)
@@ -10,5 +11,5 @@
 
 @code {
     [Parameter]
-    public User User { get; set; }
+    public UserShortBlazorModel User { get; set; }
 }

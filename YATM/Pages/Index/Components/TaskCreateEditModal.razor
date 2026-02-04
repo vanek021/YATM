@@ -54,7 +54,7 @@
         var boardService = db.GetService<BoardService>();
         var appCtx = db.GetService<ApplicationContext>();
 
-        Task!.User = appCtx.CurrentUser;
+        Task!.UserId = appCtx.CurrentUser.Id;
 
         if (Task!.Id == default)
             await boardService.CreateTaskAsync(Task);
