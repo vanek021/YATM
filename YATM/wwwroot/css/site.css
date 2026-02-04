@@ -387,6 +387,11 @@ a, .btn-link {
     color: gray;
 }
 
+.board-column--drag-over {
+    background-color: #e6f7ff;
+    border-color: #91d5ff;
+}
+
 .habits-toolbar {
     margin-bottom: 20px;
 }
