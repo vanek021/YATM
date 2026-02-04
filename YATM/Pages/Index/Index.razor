@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @page "/{BoardName}"
 
 @using YATM.BlazorModels.Boards;
@@ -55,10 +55,17 @@ else
             <tr>
                 @foreach (var col in _activeBoard.Columns)
                 {
-                    <td scope="row">
+                    <td scope="row"
+                        class="board-column @(GetColumnDragClass(col.Id))"
+                        @ondragenter="@(() => OnColumnDragEnter(col.Id))"
+                        @ondragover:preventDefault="true"
+                        @ondrop="@(() => OnTaskDrop(col))">
                         @foreach (var task in col.Tasks)
                         {
-                            <div class="board-task">
+                            <div class="board-task"
+                                 draggable="true"
+                                 @ondragstart="@(() => OnTaskDragStart(task))"
+                                 @ondragend="OnTaskDragEnd">
                                 <div class="board-task__name" @ondblclick="@(_ => OpenTaskEditModal(task))">
                                     <span class="board-task__task-id">@_activeBoard.Code-@task.TaskNumber</span> @task.Name
                                 </div>
@@ -104,6 +111,8 @@ OnCancel="OnBoardDeleteCancel">
     private BoardBlazorModel? _createEditBoard;
     private BoardCreateEditModal? _boardCreateEditModal;
     private ConfirmationModal? _boardDeleteConfirmationModal;
+    private BoardTaskBlazorModel? _draggedTask;
+    private long? _dragOverColumnId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -180,5 +189,53 @@ OnCancel="OnBoardDeleteCancel">
     private async Task OnBoardDeleteCancel()
     {
         _boardDeleteConfirmationModal!.Hide();
+    }
+
+    private void OnTaskDragStart(BoardTaskBlazorModel task)
+    {
+        _draggedTask = task;
+        _dragOverColumnId = task.BoardColumnId;
+    }
+
+    private void OnTaskDragEnd()
+    {
+        _draggedTask = null;
+        _dragOverColumnId = null;
+    }
+
+    private void OnColumnDragEnter(long columnId)
+    {
+        if (_draggedTask is null)
+            return;
+
+        _dragOverColumnId = columnId;
+    }
+
+    private string GetColumnDragClass(long columnId)
+    {
+        return _dragOverColumnId == columnId ? "board-column--drag-over" : string.Empty;
+    }
+
+    private async Task OnTaskDrop(BoardColumnBlazorModel targetColumn)
+    {
+        if (_draggedTask is null)
+            return;
+
+        if (_draggedTask.BoardColumnId == targetColumn.Id)
+        {
+            _dragOverColumnId = null;
+            return;
+        }
+
+        _draggedTask.BoardColumnId = targetColumn.Id;
+
+        using var db = dbFactory.Create();
+        var boardService = db.GetService<BoardService>();
+        await boardService.UpdateTaskAsync(_draggedTask);
+
+        await GetItemsAsync();
+
+        _draggedTask = null;
+        _dragOverColumnId = null;
     }
 }
