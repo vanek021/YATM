@@ -44,6 +44,7 @@ builder.Services.AddServerSideBlazor();
 
 builder.Services.AddScoped<BoardService>();
 builder.Services.AddScoped<NoteService>();
+builder.Services.AddScoped<RecipeService>();
 builder.Services.AddScoped<HealthService>();
 builder.Services.AddScoped<HabitService>();
 

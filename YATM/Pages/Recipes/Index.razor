@@ -1,0 +1,119 @@
+@page "/recipes"
+
+@using YATM.BlazorModels.Recipes;
+@using YATM.Components.Shared;
+@using YATM.Pages.Recipes.Components;
+@using YATM.Services;
+
+@attribute [Authorize]
+
+@inject DatabaseFactory dbFactory
+
+<PageTitle>Рецепты</PageTitle>
+
+<RecipeCreateEditModal @ref="recipeCreateEditModal" Recipe="recipeCreateEdit" OKCallback="OnModalConfirmAsync" />
+<ConfirmationModal @ref="deleteConfirmation" OnCancel="CancelDeleting" OnConfirm="@(_ => OnDeleteConfirmedAsync(deleteDraft!.Id))">
+    <div>Удалить рецепт "@deleteDraft?.Title"?</div>
+</ConfirmationModal>
+<Flex Style="padding-bottom: 10px;">
+    <div>
+        <Button OnClick="OnCreateClickAsync" Icon="@IconType.Outline.Plus">
+            Создать
+        </Button>
+    </div>
+</Flex>
+<Flex Justify="space-evenly" Wrap="wrap">
+    @foreach (var recipe in Recipes)
+    {
+        <div style="width: 380px; margin:10px;">
+            <Card>
+                <TitleTemplate>
+                    <div>@recipe.Title</div>
+                </TitleTemplate>
+                <Extra>
+                    <Button Icon="@IconType.Outline.Delete" @onclick=@(_ => OnShowDeleteConfirmation(recipe)) />
+                    <Button Icon="@IconType.Outline.Edit" @onclick=@(_ => OnEditClickAsync(recipe.Id)) />
+                </Extra>
+                <Body>
+                    @((MarkupString)recipe.Content)
+                </Body>
+            </Card>
+        </div>
+    }
+</Flex>
+
+@code {
+    private List<RecipeBlazorModel> Recipes { get; set; } = new();
+    private RecipeBlazorModel? recipeCreateEdit;
+    private RecipeCreateEditModal? recipeCreateEditModal;
+    private RecipeBlazorModel? deleteDraft;
+    private ConfirmationModal? deleteConfirmation;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetItemsAsync();
+        await base.OnInitializedAsync();
+    }
+
+    private void CancelDeleting()
+    {
+        deleteConfirmation?.Hide();
+        deleteDraft = null;
+    }
+
+    private async Task GetItemsAsync()
+    {
+        using var db = dbFactory.Create();
+        var recipeService = db.GetService<RecipeService>();
+        var appCtx = db.GetService<ApplicationContext>();
+        Recipes = await recipeService.GetRecipesByUserAsync(appCtx.CurrentUser);
+        StateHasChanged();
+    }
+
+    private async Task OnCreateClickAsync()
+    {
+        recipeCreateEdit = new();
+        recipeCreateEditModal!.OpenModal();
+    }
+
+    private async Task OnEditClickAsync(long id)
+    {
+        recipeCreateEdit = Recipes.First(r => r.Id == id);
+        recipeCreateEditModal!.OpenModal();
+    }
+
+    private void OnShowDeleteConfirmation(RecipeBlazorModel model)
+    {
+        deleteDraft = model;
+        deleteConfirmation?.Show();
+    }
+
+    private async Task OnDeleteConfirmedAsync(long id)
+    {
+        deleteConfirmation?.Hide();
+
+        if (deleteDraft == null)
+            return;
+
+        using var db = dbFactory.Create();
+        var recipeService = db.GetService<RecipeService>();
+        await recipeService.DeleteRecipeAsync(id);
+
+        await GetItemsAsync();
+        StateHasChanged();
+    }
+
+    private async Task OnModalConfirmAsync()
+    {
+        using var db = dbFactory.Create();
+        var recipeService = db.GetService<RecipeService>();
+
+        if (recipeCreateEdit!.Id == default)
+            await recipeService.CreateRecipeAsync(recipeCreateEdit);
+        else
+            await recipeService.UpdateRecipeAsync(recipeCreateEdit);
+
+        await GetItemsAsync();
+        StateHasChanged();
+    }
+}

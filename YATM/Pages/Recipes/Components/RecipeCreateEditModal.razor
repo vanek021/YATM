@@ -1,0 +1,46 @@
+@using YATM.BlazorModels.Recipes
+
+<Modal Visible="visible" Closable="false" Centered="true" OnOk="OnOK" OnCancel="OnCancel" Title="@Recipe?.Title">
+    <Form Model="Recipe" @ref="form">
+        <FormItem>
+            <Input Placeholder="Заголовок" @bind-Value="@Recipe!.Title" />
+        </FormItem>
+        <FormItem>
+            <TinyMCE.Blazor.Editor ApiKey="8x4if75v87gl8oelediq72dnb2yomjxelaonbn6p2nyictgk"
+                                   Field="() => Recipe!.Content"
+                                   @bind-Value="Recipe!.Content" />
+        </FormItem>
+    </Form>
+</Modal>
+
+@code {
+    [Parameter]
+    public RecipeBlazorModel? Recipe { get; set; } = new();
+
+    [Parameter]
+    public EventCallback OKCallback { get; set; }
+
+    private Form<RecipeBlazorModel?>? form;
+    private bool visible = false;
+
+    public void OpenModal()
+    {
+        visible = true;
+        StateHasChanged();
+    }
+
+    private void OnOK()
+    {
+        var isValid = form!.Validate();
+        if (isValid)
+        {
+            OKCallback.InvokeAsync();
+            visible = false;
+        }
+    }
+
+    private void OnCancel()
+    {
+        visible = false;
+    }
+}
