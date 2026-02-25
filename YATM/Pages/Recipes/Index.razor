@@ -1,0 +1,158 @@
+@page "/recipes"
+
+@using YATM.BlazorModels.Recipes
+@using YATM.Services
+
+@attribute [Authorize]
+
+@inject DatabaseFactory dbFactory
+
+<PageTitle>Рецепты</PageTitle>
+
+<h1>Импорт рецептов</h1>
+
+<div class="recipes-import">
+    <div class="recipes-import__row">
+        <Input Placeholder="Вставьте ссылку на рецепт" @bind-Value="_recipeUrl" />
+        <Button Type="primary" Loading="_isImporting" OnClick="ImportRecipeAsync">
+            Импортировать
+        </Button>
+    </div>
+
+    @if (_supportedSites.Any())
+    {
+        <div class="recipes-import__supported">
+            <span>Поддерживаемые сайты:</span>
+            @foreach (var site in _supportedSites)
+            {
+                <Tag Color="blue">@site.Name (@site.Host)</Tag>
+            }
+        </div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(_importError))
+    {
+        <Alert Type="@AlertType.Error" Message="@_importError" ShowIcon />
+    }
+
+    @if (!string.IsNullOrWhiteSpace(_importSuccess))
+    {
+        <Alert Type="@AlertType.Success" Message="@_importSuccess" ShowIcon />
+    }
+</div>
+
+@if (_recipes == null)
+{
+    <Spin Size="Large" />
+}
+else if (!_recipes.Any())
+{
+    <div class="recipes-empty">
+        Пока нет импортированных рецептов. Добавьте первый по ссылке.
+    </div>
+}
+else
+{
+    <div class="recipes-list">
+        @foreach (var recipe in _recipes)
+        {
+            <Card Class="recipe-card">
+                <TitleTemplate>
+                    <div class="recipe-card__title">@recipe.Title</div>
+                </TitleTemplate>
+                <Extra>
+                    <Tag Color="processing">@recipe.SourceName</Tag>
+                </Extra>
+                <Body>
+                    @if (!string.IsNullOrWhiteSpace(recipe.Description))
+                    {
+                        <div class="recipe-card__description">@recipe.Description</div>
+                    }
+
+                    <div class="recipe-card__meta">
+                        <a href="@recipe.SourceRecipeUrl" target="_blank" rel="noopener noreferrer">@recipe.SourceHost</a>
+                        <span>Импортировано: @recipe.ImportedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                    </div>
+
+                    @if (recipe.IngredientItems.Any())
+                    {
+                        <div class="recipe-card__section">
+                            <div class="recipe-card__section-title">Ингредиенты</div>
+                            <ul>
+                                @foreach (var ingredient in recipe.IngredientItems)
+                                {
+                                    <li>@ingredient</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
+                    @if (recipe.StepItems.Any())
+                    {
+                        <div class="recipe-card__section">
+                            <div class="recipe-card__section-title">Шаги приготовления</div>
+                            <ol>
+                                @foreach (var step in recipe.StepItems)
+                                {
+                                    <li>@step</li>
+                                }
+                            </ol>
+                        </div>
+                    }
+                </Body>
+            </Card>
+        }
+    </div>
+}
+
+@code {
+    private List<RecipeBlazorModel>? _recipes;
+    private List<RecipeImportSiteBlazorModel> _supportedSites = new();
+    private string _recipeUrl = string.Empty;
+    private string? _importError;
+    private string? _importSuccess;
+    private bool _isImporting;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var db = dbFactory.Create();
+        var recipeService = db.GetService<RecipeService>();
+        var appCtx = db.GetService<ApplicationContext>();
+
+        _supportedSites = recipeService.GetSupportedSites();
+        _recipes = await recipeService.GetRecipesByUserAsync(appCtx.CurrentUser);
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task ImportRecipeAsync()
+    {
+        if (_isImporting)
+            return;
+
+        _isImporting = true;
+        _importError = null;
+        _importSuccess = null;
+
+        try
+        {
+            using var db = dbFactory.Create();
+            var recipeService = db.GetService<RecipeService>();
+            var appCtx = db.GetService<ApplicationContext>();
+
+            var imported = await recipeService.ImportRecipeFromUrlAsync(appCtx.CurrentUser, _recipeUrl);
+            _importSuccess = $"Рецепт \"{imported.Title}\" успешно импортирован.";
+            _recipeUrl = string.Empty;
+            _recipes = await recipeService.GetRecipesByUserAsync(appCtx.CurrentUser);
+        }
+        catch (Exception ex)
+        {
+            _importError = ex.Message;
+        }
+        finally
+        {
+            _isImporting = false;
+            StateHasChanged();
+        }
+    }
+}
