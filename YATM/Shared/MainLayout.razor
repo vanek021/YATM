@@ -6,60 +6,67 @@
 
 <PageTitle>YATM</PageTitle>
 
-<Layout>
-    <header Class="header">
-        <div class="content">
-            <div class="logo" />
-            <div class="header__menu">
-                <div class="navigation @NavMenuCssClass" @onclick="ToggleNavMenu">
-                    <nav class="menu">
-                        <NavLink class="menu__item" href="" Match="NavLinkMatch.All">
-                            Доски
-                        </NavLink>
-                        <NavLink class="menu__item" href="notes">
-                            Заметки
-                        </NavLink>
-                        <NavLink class="menu__item" href="health">
-                            Здоровье
-                        </NavLink>
-                        <NavLink class="menu__item" href="habits">
-                            Привычки
-                        </NavLink>
-                        <SimpleTimer />
-                    </nav>
-                </div>
+<Layout class="app-layout">
+    <header class="app-header">
+        <div class="app-header__inner">
+            <NavLink class="app-brand" href="" Match="NavLinkMatch.All" @onclick="CloseNavMenu">
+                <span class="app-brand__logo" aria-hidden="true"></span>
+                <span class="app-brand__label">
+                    <span class="app-brand__title">YATM</span>
+                    <span class="app-brand__subtitle">Yet Another Task Manager</span>
+                </span>
+            </NavLink>
 
-                <div class="hamburger" @onclick="ToggleNavMenu">
-                    <div class="svg-icon icon-hamburger">
-                        <div style="color: white;">
-                            <Icon Width="26px" Height="26px" Type="menu" Theme="outline" />
-                        </div>
+            <div class="app-header__navigation">
+                <nav class="app-nav @NavMenuCssClass" aria-label="Основное меню">
+                    <NavLink class="app-nav__link" href="" Match="NavLinkMatch.All" @onclick="CloseNavMenu">
+                        Доски
+                    </NavLink>
+                    <NavLink class="app-nav__link" href="notes" @onclick="CloseNavMenu">
+                        Заметки
+                    </NavLink>
+                    <NavLink class="app-nav__link" href="health" @onclick="CloseNavMenu">
+                        Здоровье
+                    </NavLink>
+                    <NavLink class="app-nav__link" href="habits" @onclick="CloseNavMenu">
+                        Привычки
+                    </NavLink>
+                    <div class="app-nav__timer">
+                        <SimpleTimer />
                     </div>
-                </div>
+                </nav>
+
+                <button type="button"
+                        class="app-header__burger"
+                        @onclick="ToggleNavMenu"
+                        aria-label="Переключить меню"
+                        aria-expanded="@(!_collapseNavMenu)">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
             </div>
         </div>
     </header>
-    <Content Class="content" Style="overflow: auto;">
-        <div class="site-layout-content">@Body</div>
-    </Content>
-    <Footer Class="footer">YATM - Yet Another Task Manager - Еще один менеджер задач!</Footer>
-</Layout>
 
-<style>
-    .logo {
-        width: 32px;
-        height: 32px;
-        background: url("favicon.png");
-        margin: 16px 24px 16px 0;
-        float: left;
+    @if (!_collapseNavMenu)
+    {
+        <button type="button" class="app-mobile-backdrop" @onclick="CloseNavMenu" aria-label="Закрыть меню"></button>
     }
-</style>
+
+    <Content Class="app-content">
+        <div class="site-layout-content">
+            @Body
+        </div>
+    </Content>
+    <Footer Class="app-footer">YATM - Yet Another Task Manager - Еще один менеджер задач!</Footer>
+</Layout>
 
 @code {
 
     private bool _collapseNavMenu = true;
 
-    private string? NavMenuCssClass => _collapseNavMenu ? "collapse" : "menu-open";
+    private string NavMenuCssClass => _collapseNavMenu ? "app-nav--collapsed" : "app-nav--open";
 
     protected override async Task OnInitializedAsync()
     {
@@ -74,5 +81,10 @@
     private void ToggleNavMenu()
     {
         _collapseNavMenu = !_collapseNavMenu;
+    }
+
+    private void CloseNavMenu()
+    {
+        _collapseNavMenu = true;
     }
 }
