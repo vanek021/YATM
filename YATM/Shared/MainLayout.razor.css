@@ -113,6 +113,7 @@
 
 .app-nav__timer {
     margin-left: 0.5rem;
+    margin-right: 0.5rem;
     padding-left: 0.75rem;
     border-left: 1px solid rgba(255, 255, 255, 0.16);
 }
