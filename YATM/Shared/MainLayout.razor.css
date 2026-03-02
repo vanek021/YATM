@@ -205,6 +205,9 @@
 
 .app-footer,
 ::deep .app-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     text-align: center;
     color: #dbe7ff;
     padding: 13px 16px 15px;
