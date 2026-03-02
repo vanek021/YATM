@@ -185,6 +185,7 @@
 .app-content,
 ::deep .app-content {
     width: 100%;
+    overflow: visible !important;
 }
 
 .app-content-shell {
@@ -195,12 +196,13 @@
     max-width: 1320px;
     margin: 0 auto;
     min-height: calc(100vh - 188px);
+    height: auto;
     padding: clamp(14px, 2.4vw, 28px);
     border-radius: 18px;
     border: 1px solid #e5ebf5;
     background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 16px 40px rgba(18, 38, 70, 0.09);
-    overflow-x: auto;
+    overflow: visible;
 }
 
 .app-footer,
