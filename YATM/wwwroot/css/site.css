@@ -66,8 +66,8 @@ a, .btn-link {
 .site-layout-content {
     background: #fff;
     padding: 24px;
-    height: 100%;
-    overflow: auto;
+    height: auto;
+    overflow: visible;
 }
 
 .footer {
@@ -343,6 +343,11 @@ a, .btn-link {
     min-width: 720px;
     table-layout: fixed;
     border-collapse: collapse;
+}
+
+.board-table-container {
+    width: 100%;
+    overflow-x: auto;
 }
 
     .board-table th,

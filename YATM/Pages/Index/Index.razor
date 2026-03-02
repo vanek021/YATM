@@ -42,56 +42,58 @@ else
             <Button Danger OnClick="OnBoardDelete" Icon="@IconType.Outline.Delete"></Button>
         </div>
     </Flex>
-    <table class="table board-table">
-        <thead>
-            <tr>
-                @foreach (var col in _activeBoard.Columns)
-                {
-                    <th scope="col">@col.Name @(col.Tasks.Any() ? $"({col.Tasks.Count})" : "")</th>
-                }
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                @foreach (var col in _activeBoard.Columns)
-                {
-                    <td scope="row"
-                        class="board-column @(GetColumnDragClass(col.Id))"
-                        @ondragenter="@(() => OnColumnDragEnter(col.Id))"
-                        @ondragover="@(() => OnColumnDragOver(col.Id))"
-                        @ondragover:preventDefault="true"
-                        @ondrop="@(() => OnTaskDrop(col))"
-                        @ondrop:preventDefault="true">
-                        @foreach (var task in col.Tasks)
-                        {
-                            <div class="board-task"
-                                 draggable="true"
-                                 @ondragstart="@(() => OnTaskDragStart(task))"
-                                 @ondragend="OnTaskDragEnd">
-                                <div class="board-task__name" @ondblclick="@(_ => OpenTaskEditModal(task))">
-                                    <span class="board-task__task-id">@_activeBoard.Code-@task.TaskNumber</span> @task.Name
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <div class="board-task__expire-date">
-                                        @if (task.ExpireDate is not null)
-                                        {
-                                            <div>@task.ExpireDate.GetDateOnly()</div>
-                                        }
+    <div class="board-table-container">
+        <table class="table board-table">
+            <thead>
+                <tr>
+                    @foreach (var col in _activeBoard.Columns)
+                    {
+                        <th scope="col">@col.Name @(col.Tasks.Any() ? $"({col.Tasks.Count})" : "")</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    @foreach (var col in _activeBoard.Columns)
+                    {
+                        <td scope="row"
+                            class="board-column @(GetColumnDragClass(col.Id))"
+                            @ondragenter="@(() => OnColumnDragEnter(col.Id))"
+                            @ondragover="@(() => OnColumnDragOver(col.Id))"
+                            @ondragover:preventDefault="true"
+                            @ondrop="@(() => OnTaskDrop(col))"
+                            @ondrop:preventDefault="true">
+                            @foreach (var task in col.Tasks)
+                            {
+                                <div class="board-task"
+                                     draggable="true"
+                                     @ondragstart="@(() => OnTaskDragStart(task))"
+                                     @ondragend="OnTaskDragEnd">
+                                    <div class="board-task__name" @ondblclick="@(_ => OpenTaskEditModal(task))">
+                                        <span class="board-task__task-id">@_activeBoard.Code-@task.TaskNumber</span> @task.Name
                                     </div>
-                                    <div class="board-task__avatar">
-                                        <YATM.Components.Shared.Avatar User="task.User" />
+                                    <div class="d-flex justify-content-between">
+                                        <div class="board-task__expire-date">
+                                            @if (task.ExpireDate is not null)
+                                            {
+                                                <div>@task.ExpireDate.GetDateOnly()</div>
+                                            }
+                                        </div>
+                                        <div class="board-task__avatar">
+                                            <YATM.Components.Shared.Avatar User="task.User" />
+                                        </div>
                                     </div>
                                 </div>
+                            }
+                            <div class="board-task__create">
+                                <Button OnClick="OpenTaskCreateModal">Создать..</Button>
                             </div>
-                        }
-                        <div class="board-task__create">
-                            <Button OnClick="OpenTaskCreateModal">Создать..</Button>
-                        </div>
-                    </td>
-                }
-            </tr>
-        </tbody>
-    </table>
+                        </td>
+                    }
+                </tr>
+            </tbody>
+        </table>
+    </div>
 }
 
 <ConfirmationModal Title="Удаление доски"
