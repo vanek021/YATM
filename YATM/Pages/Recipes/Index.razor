@@ -8,6 +8,7 @@
 @attribute [Authorize]
 
 @inject DatabaseFactory dbFactory
+@inject NavigationManager navManager
 
 <PageTitle>Рецепты</PageTitle>
 
@@ -19,6 +20,12 @@
     <div>
         <Button OnClick="OnCreateClickAsync" Icon="@IconType.Outline.Plus">
             Создать
+        </Button>
+    </div>
+    <div>
+        <Button OnClick="OnLuckyClick"
+                Disabled="@(!Recipes.Any())">
+            Мне повезет!
         </Button>
     </div>
     <div style="display: flex; gap: 8px; align-items: center;">
@@ -50,9 +57,10 @@
         <div style="width: 380px; margin:10px;">
             <Card>
                 <TitleTemplate>
-                    <div>@recipe.Title</div>
+                    <div style="cursor: pointer;" @onclick="@(_ => OpenRecipe(recipe.Id))">@recipe.Title</div>
                 </TitleTemplate>
                 <Extra>
+                    <Button @onclick="@(_ => OpenRecipe(recipe.Id))">Открыть</Button>
                     <Button Icon="@IconType.Outline.Delete" @onclick=@(_ => OnShowDeleteConfirmation(recipe)) />
                     <Button Icon="@IconType.Outline.Edit" @onclick=@(_ => OnEditClickAsync(recipe.Id)) />
                 </Extra>
@@ -193,5 +201,19 @@
             isImporting = false;
             StateHasChanged();
         }
+    }
+
+    private void OnLuckyClick()
+    {
+        if (!Recipes.Any())
+            return;
+
+        var randomRecipe = Recipes[Random.Shared.Next(Recipes.Count)];
+        OpenRecipe(randomRecipe.Id);
+    }
+
+    private void OpenRecipe(long recipeId)
+    {
+        navManager.NavigateTo($"/recipes/{recipeId}");
     }
 }

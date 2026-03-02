@@ -29,6 +29,12 @@ namespace YATM.Services
             return _mapper.Map<List<RecipeBlazorModel>>(recipes);
         }
 
+        public async Task<RecipeBlazorModel?> GetRecipeByIdAsync(long recipeId)
+        {
+            var recipe = await _db.Recipes.GetByIdAsync(recipeId, _appCtx.CurrentUser.Id);
+            return recipe is null ? null : _mapper.Map<RecipeBlazorModel>(recipe);
+        }
+
         public List<RecipeImportSourceSiteBlazorModel> GetSupportedImportSites()
         {
             return _recipeImportService.GetSupportedSites()

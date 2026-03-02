@@ -1,0 +1,76 @@
+@page "/recipes/{Id:long}"
+
+@using YATM.BlazorModels.Recipes
+@using YATM.Services
+
+@attribute [Authorize]
+
+@inject DatabaseFactory dbFactory
+@inject NavigationManager navManager
+
+<PageTitle>@(recipe?.Title ?? "Рецепт")</PageTitle>
+
+@if (isLoading)
+{
+    <Spin Size="Large" />
+}
+else if (recipe is null)
+{
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="padding: 12px; border: 1px solid #f0f0f0; border-radius: 6px;">
+            Рецепт не найден или у вас нет к нему доступа.
+        </div>
+        <div>
+            <Button OnClick="BackToRecipes">К списку рецептов</Button>
+        </div>
+    </div>
+}
+else
+{
+    <Flex Style="padding-bottom: 10px;" Wrap="wrap" Gap="small">
+        <Button OnClick="BackToRecipes">К списку рецептов</Button>
+    </Flex>
+
+    <Card>
+        <TitleTemplate>
+            <div>@recipe.Title</div>
+        </TitleTemplate>
+        <Body>
+            @if (!string.IsNullOrWhiteSpace(recipe.SourceSiteName))
+            {
+                <div style="margin-bottom: 8px;">
+                    <Tag Color="processing">@recipe.SourceSiteName</Tag>
+                    @if (!string.IsNullOrWhiteSpace(recipe.SourceUrl))
+                    {
+                        <a href="@recipe.SourceUrl" target="_blank" rel="noopener noreferrer">Оригинал</a>
+                    }
+                </div>
+            }
+            @((MarkupString)recipe.Content)
+        </Body>
+    </Card>
+}
+
+@code {
+    [Parameter]
+    public long Id { get; set; }
+
+    private RecipeBlazorModel? recipe;
+    private bool isLoading = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        isLoading = true;
+
+        using var db = dbFactory.Create();
+        var recipeService = db.GetService<RecipeService>();
+        recipe = await recipeService.GetRecipeByIdAsync(Id);
+
+        isLoading = false;
+    }
+
+    private void BackToRecipes()
+    {
+        navManager.NavigateTo("/recipes");
+    }
+}
