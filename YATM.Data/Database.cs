@@ -12,7 +12,8 @@ namespace YATM.Data
     {
         public Database(DbContext context, BoardRepository boardRepo, BoardTaskRepository boardTaskRepo, NoteRepository noteRepo,
             NoteTagRepository noteTagRepo, HealthRecordRepository healthRecordRepo, TemperatureRecordRepository temperatureRecordRepo,
-            HabitRepository habitRepo, HabitCheckInRepository habitCheckInRepo) : base(context)
+            HabitRepository habitRepo, HabitCheckInRepository habitCheckInRepo, RecipeRepository recipeRepo,
+            RecipeSourceRepository recipeSourceRepo) : base(context)
         {
             Boards = boardRepo;
             BoardTasks = boardTaskRepo;
@@ -22,6 +23,8 @@ namespace YATM.Data
             TemperatureRecords = temperatureRecordRepo;
             Habits = habitRepo;
             HabitCheckIns = habitCheckInRepo;
+            Recipes = recipeRepo;
+            RecipeSources = recipeSourceRepo;
         }
 
         public BoardRepository Boards { get; private set; }
@@ -32,5 +35,7 @@ namespace YATM.Data
         public TemperatureRecordRepository TemperatureRecords { get; private set; }
         public HabitRepository Habits { get; private set; }
         public HabitCheckInRepository HabitCheckIns { get; private set; }
+        public RecipeRepository Recipes { get; private set; }
+        public RecipeSourceRepository RecipeSources { get; private set; }
     }
 }

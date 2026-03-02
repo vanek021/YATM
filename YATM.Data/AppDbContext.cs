@@ -6,6 +6,7 @@ using YATM.Models.Entities.Boards;
 using YATM.Models.Entities.Habits;
 using YATM.Models.Entities.Health;
 using YATM.Models.Entities.Notes;
+using YATM.Models.Entities.Recipes;
 
 namespace YATM.Data
 {
@@ -34,6 +35,20 @@ namespace YATM.Data
                 .HasIndex(e => new { e.HabitId, e.CheckInDate })
                 .IsUnique();
 
+            builder.Entity<Recipe>()
+                .HasOne(e => e.RecipeSource)
+                .WithMany(e => e.Recipes)
+                .HasForeignKey(e => e.RecipeSourceId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<RecipeSource>()
+                .HasIndex(e => e.Host)
+                .IsUnique();
+
+            builder.Entity<Recipe>()
+                .HasIndex(e => new { e.UserId, e.SourceRecipeUrl })
+                .IsUnique();
+
 
             base.OnModelCreating(builder);
         }
@@ -51,5 +66,8 @@ namespace YATM.Data
 
         public DbSet<Habit> Habits { get; set; }
         public DbSet<HabitCheckIn> HabitCheckIns { get; set; }
+
+        public DbSet<Recipe> Recipes { get; set; }
+        public DbSet<RecipeSource> RecipeSources { get; set; }
     }
 }
