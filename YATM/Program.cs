@@ -8,6 +8,7 @@ using YATM.Data.Seeds;
 using YATM.Factories;
 using YATM.Models.Entities;
 using YATM.Services;
+using YATM.Services.Recipes.Import;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +42,7 @@ builder.Services.AddAntDesign();
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddRecipeImporting();
 
 builder.Services.AddScoped<BoardService>();
 builder.Services.AddScoped<NoteService>();

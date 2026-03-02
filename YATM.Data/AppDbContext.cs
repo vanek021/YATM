@@ -35,6 +35,10 @@ namespace YATM.Data
                 .HasIndex(e => new { e.HabitId, e.CheckInDate })
                 .IsUnique();
 
+            builder.Entity<RecipeSourceSite>()
+                .HasIndex(e => e.Code)
+                .IsUnique();
+
 
             base.OnModelCreating(builder);
         }
@@ -48,6 +52,7 @@ namespace YATM.Data
         public DbSet<NoteNoteTags> NoteNoteTags { get; set; }
 
         public DbSet<Recipe> Recipes { get; set; }
+        public DbSet<RecipeSourceSite> RecipeSourceSites { get; set; }
 
         public DbSet<HealthRecord> HealthRecords { get; set; }
         public DbSet<TemperatureRecord> TemperatureRecords { get; set; }

@@ -15,7 +15,8 @@ namespace YATM.Data.Repositories
 
         protected override IQueryable<Recipe> SingleWithIncludes()
         {
-            return base.SingleWithIncludes();
+            return base.SingleWithIncludes()
+                .Include(r => r.SourceSite);
         }
 
         protected override IQueryable<Recipe> ManyWithIncludes()
