@@ -1,4 +1,4 @@
-﻿@page "/notes"
+@page "/notes"
 
 @using YATM.BlazorModels.Notes;
 @using YATM.BlazorModels.Notes.NoteTags
@@ -18,21 +18,23 @@
 <ConfirmationModal @ref="deleteConfirmation" OnCancel="CancelDeleting" OnConfirm="@(_ => OnDeleteConfirmedAsync(deleteDraft!.Id))">
     <div>Удалить заметку "@deleteDraft?.Title"?</div>
 </ConfirmationModal>
-<Flex Style="padding-bottom: 10px;">
+<Flex Class="notes-toolbar" Style="padding-bottom: 10px;" Wrap="wrap" Gap="small">
     <div>
         <Button OnClick="OnCreateClickAsync" Icon="@IconType.Outline.Plus">
             Создать
         </Button>
     </div>
-    <NoteTagSelect @ref="noteTagSelect"
-                   OnSelectedItemsChanged="OnSelectedTagsChanged"
-                   Style="width: 500px; margin-left: 20px;" />
+    <div class="notes-toolbar__tags">
+        <NoteTagSelect @ref="noteTagSelect"
+                       OnSelectedItemsChanged="OnSelectedTagsChanged"
+                       Style="width: 100%;" />
+    </div>
     <a href="/notes/notetags"><Button><Icon Type="edit" Theme="outline" /></Button></a>
 </Flex>
 <Flex Justify="space-evenly" Wrap="wrap">
     @foreach (var note in Notes)
     {
-        <div style="width: 380px; margin:10px;">
+        <div class="note-card-wrapper">
             <Card>
                 <TitleTemplate>
                     <div>@note.Title</div>
