@@ -10,7 +10,6 @@
     <header class="app-header">
         <div class="app-header__inner">
             <NavLink class="app-brand" href="" Match="NavLinkMatch.All" @onclick="CloseNavMenu">
-                <span class="app-brand__logo" aria-hidden="true"></span>
                 <span class="app-brand__label">
                     <span class="app-brand__title">YATM</span>
                     <span class="app-brand__subtitle">Yet Another Task Manager</span>
@@ -55,8 +54,10 @@
     }
 
     <Content Class="app-content">
-        <div class="site-layout-content">
-            @Body
+        <div class="app-content-shell">
+            <div class="site-layout-content">
+                @Body
+            </div>
         </div>
     </Content>
     <Footer Class="app-footer">YATM - Yet Another Task Manager - Еще один менеджер задач!</Footer>
