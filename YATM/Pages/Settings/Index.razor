@@ -1,0 +1,201 @@
+@page "/settings"
+
+@using System.ComponentModel.DataAnnotations
+@using System.Linq
+@using Microsoft.AspNetCore.Identity
+@using YATM.Models.Entities
+
+@attribute [Authorize]
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<User> UserManager
+@inject SignInManager<User> SignInManager
+
+<PageTitle>Настройки</PageTitle>
+
+<div class="settings-page">
+    <h1>Настройки пользователя</h1>
+
+    <div class="settings-card">
+        <h2>Смена пароля</h2>
+        <div class="settings-card__subtitle">
+            Для безопасности укажите текущий пароль и дважды введите новый.
+        </div>
+
+        @if (_successMessage is not null)
+        {
+            <div class="alert alert-success" role="alert">
+                @_successMessage
+            </div>
+        }
+
+        @if (_errorMessages.Any())
+        {
+            <div class="alert alert-danger" role="alert">
+                <ul class="mb-0">
+                    @foreach (var error in _errorMessages)
+                    {
+                        <li>@error</li>
+                    }
+                </ul>
+            </div>
+        }
+
+        @if (!_hasPassword)
+        {
+            <div class="alert alert-warning mb-0" role="alert">
+                У вашего аккаунта нет локального пароля. Этот сценарий пока не поддерживается на странице настроек.
+            </div>
+        }
+        else
+        {
+            <EditForm Model="_changePasswordModel" OnValidSubmit="ChangePasswordAsync">
+                <DataAnnotationsValidator />
+
+                <div class="mb-3">
+                    <label for="current-password" class="form-label">Текущий пароль</label>
+                    <InputText id="current-password"
+                               class="form-control"
+                               type="password"
+                               autocomplete="current-password"
+                               @bind-Value="_changePasswordModel.CurrentPassword"
+                               disabled="@_isSubmitting" />
+                    <ValidationMessage For="@(() => _changePasswordModel.CurrentPassword)" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="new-password" class="form-label">Новый пароль</label>
+                    <InputText id="new-password"
+                               class="form-control"
+                               type="password"
+                               autocomplete="new-password"
+                               @bind-Value="_changePasswordModel.NewPassword"
+                               disabled="@_isSubmitting" />
+                    <ValidationMessage For="@(() => _changePasswordModel.NewPassword)" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="confirm-new-password" class="form-label">Подтверждение нового пароля</label>
+                    <InputText id="confirm-new-password"
+                               class="form-control"
+                               type="password"
+                               autocomplete="new-password"
+                               @bind-Value="_changePasswordModel.ConfirmNewPassword"
+                               disabled="@_isSubmitting" />
+                    <ValidationMessage For="@(() => _changePasswordModel.ConfirmNewPassword)" />
+                </div>
+
+                <button type="submit" class="btn btn-primary" disabled="@_isSubmitting">
+                    @if (_isSubmitting)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    }
+                    Изменить пароль
+                </button>
+            </EditForm>
+        }
+    </div>
+</div>
+
+@code {
+    private ChangePasswordInputModel _changePasswordModel = new();
+    private List<string> _errorMessages = new();
+    private string? _successMessage;
+    private bool _isSubmitting;
+    private bool _hasPassword = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await GetCurrentUserAsync();
+        if (user is null)
+        {
+            _errorMessages.Add("Не удалось определить текущего пользователя. Перезайдите в систему.");
+            return;
+        }
+
+        _hasPassword = await UserManager.HasPasswordAsync(user);
+    }
+
+    private async Task ChangePasswordAsync()
+    {
+        _errorMessages.Clear();
+        _successMessage = null;
+        _isSubmitting = true;
+
+        try
+        {
+            var user = await GetCurrentUserAsync();
+            if (user is null)
+            {
+                _errorMessages.Add("Не удалось определить текущего пользователя. Перезайдите в систему.");
+                return;
+            }
+
+            var result = await UserManager.ChangePasswordAsync(
+                user,
+                _changePasswordModel.CurrentPassword,
+                _changePasswordModel.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                _errorMessages = result.Errors
+                    .Select(MapIdentityError)
+                    .Distinct()
+                    .ToList();
+                return;
+            }
+
+            await SignInManager.RefreshSignInAsync(user);
+
+            _changePasswordModel = new();
+            _successMessage = "Пароль успешно изменен.";
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    private async Task<User?> GetCurrentUserAsync()
+    {
+        var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var principal = authenticationState.User;
+
+        if (principal.Identity is null || !principal.Identity.IsAuthenticated)
+            return null;
+
+        return await UserManager.GetUserAsync(principal);
+    }
+
+    private static string MapIdentityError(IdentityError error)
+    {
+        return error.Code switch
+        {
+            nameof(IdentityErrorDescriber.PasswordMismatch) => "Текущий пароль указан неверно.",
+            nameof(IdentityErrorDescriber.PasswordTooShort) => "Новый пароль слишком короткий.",
+            nameof(IdentityErrorDescriber.PasswordRequiresDigit) => "Новый пароль должен содержать цифру.",
+            nameof(IdentityErrorDescriber.PasswordRequiresLower) => "Новый пароль должен содержать строчную букву.",
+            nameof(IdentityErrorDescriber.PasswordRequiresUpper) => "Новый пароль должен содержать заглавную букву.",
+            nameof(IdentityErrorDescriber.PasswordRequiresNonAlphanumeric) => "Новый пароль должен содержать специальный символ.",
+            nameof(IdentityErrorDescriber.PasswordRequiresUniqueChars) => "Новый пароль должен содержать больше уникальных символов.",
+            _ => error.Description
+        };
+    }
+
+    private sealed class ChangePasswordInputModel
+    {
+        [Required(ErrorMessage = "Введите текущий пароль.")]
+        [DataType(DataType.Password)]
+        public string CurrentPassword { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Введите новый пароль.")]
+        [StringLength(100, ErrorMessage = "Новый пароль должен содержать минимум {2} символов.", MinimumLength = 6)]
+        [DataType(DataType.Password)]
+        public string NewPassword { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Повторите новый пароль.")]
+        [DataType(DataType.Password)]
+        [Compare(nameof(NewPassword), ErrorMessage = "Новый пароль и подтверждение не совпадают.")]
+        public string ConfirmNewPassword { get; set; } = string.Empty;
+    }
+}

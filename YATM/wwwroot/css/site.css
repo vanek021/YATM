@@ -558,6 +558,27 @@ a, .btn-link {
     margin: 10px;
 }
 
+.settings-page {
+    width: min(680px, 100%);
+}
+
+.settings-card {
+    margin-top: 14px;
+    padding: 20px;
+    border: 1px solid #e9eef6;
+    border-radius: 10px;
+    background-color: #fff;
+}
+
+.settings-card h2 {
+    margin-bottom: 6px;
+}
+
+.settings-card__subtitle {
+    color: #6c757d;
+    margin-bottom: 14px;
+}
+
 @media (max-width: 991.98px) {
     .notes-toolbar__tags {
         margin-left: 0;
@@ -583,6 +604,10 @@ a, .btn-link {
     .note-card-wrapper {
         width: 100%;
         margin: 8px 0;
+    }
+
+    .settings-card {
+        padding: 16px;
     }
 
     .notetag__container-outer,
