@@ -12,5 +12,11 @@ namespace YATM.Models.Entities.Recipes
         [ForeignKey(nameof(UserId))]
         public User User { get; set; }
         public long UserId { get; set; }
+
+        [ForeignKey(nameof(SourceSiteId))]
+        public RecipeSourceSite? SourceSite { get; set; }
+        public long? SourceSiteId { get; set; }
+
+        public string? SourceUrl { get; set; }
     }
 }

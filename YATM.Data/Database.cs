@@ -11,7 +11,7 @@ namespace YATM.Data
     public class Database : AbstractDatabase
     {
         public Database(DbContext context, BoardRepository boardRepo, BoardTaskRepository boardTaskRepo, NoteRepository noteRepo,
-            NoteTagRepository noteTagRepo, RecipeRepository recipeRepo, HealthRecordRepository healthRecordRepo,
+            NoteTagRepository noteTagRepo, RecipeRepository recipeRepo, RecipeSourceSiteRepository recipeSourceSiteRepo, HealthRecordRepository healthRecordRepo,
             TemperatureRecordRepository temperatureRecordRepo, HabitRepository habitRepo, HabitCheckInRepository habitCheckInRepo)
             : base(context)
         {
@@ -20,6 +20,7 @@ namespace YATM.Data
             Notes = noteRepo;
             NoteTags = noteTagRepo;
             Recipes = recipeRepo;
+            RecipeSourceSites = recipeSourceSiteRepo;
             HealthRecords = healthRecordRepo;
             TemperatureRecords = temperatureRecordRepo;
             Habits = habitRepo;
@@ -31,6 +32,7 @@ namespace YATM.Data
         public NoteRepository Notes { get; private set; }
         public NoteTagRepository NoteTags { get; private set; }
         public RecipeRepository Recipes { get; private set; }
+        public RecipeSourceSiteRepository RecipeSourceSites { get; private set; }
         public HealthRecordRepository HealthRecords { get; private set; }
         public TemperatureRecordRepository TemperatureRecords { get; private set; }
         public HabitRepository Habits { get; private set; }

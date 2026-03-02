@@ -11,5 +11,10 @@ namespace YATM.BlazorModels.Recipes
 
         [Required]
         public string Content { get; set; }
+
+        public long? SourceSiteId { get; set; }
+        public string? SourceSiteName { get; set; }
+        public string? SourceSiteHost { get; set; }
+        public string? SourceUrl { get; set; }
     }
 }

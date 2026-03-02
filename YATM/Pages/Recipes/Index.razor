@@ -15,13 +15,35 @@
 <ConfirmationModal @ref="deleteConfirmation" OnCancel="CancelDeleting" OnConfirm="@(_ => OnDeleteConfirmedAsync(deleteDraft!.Id))">
     <div>Удалить рецепт "@deleteDraft?.Title"?</div>
 </ConfirmationModal>
-<Flex Style="padding-bottom: 10px;">
+<Flex Style="padding-bottom: 10px;" Wrap="wrap" Gap="small">
     <div>
         <Button OnClick="OnCreateClickAsync" Icon="@IconType.Outline.Plus">
             Создать
         </Button>
     </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+        <Input Placeholder="https://food.ru/recipes/... или https://www.russianfood.com/recipes/..."
+               @bind-Value="importUrl"
+               Style="width: 420px;" />
+        <Button Type="primary"
+                Loading="@isImporting"
+                OnClick="OnImportClickAsync">
+            Импортировать
+        </Button>
+    </div>
 </Flex>
+@if (!string.IsNullOrWhiteSpace(importError))
+{
+    <div style="padding-bottom: 10px; color: #cf1322;">
+        @importError
+    </div>
+}
+@if (!string.IsNullOrWhiteSpace(supportedSitesSummary))
+{
+    <div style="padding-bottom: 10px; color: #8c8c8c; font-size: 12px;">
+        Поддерживаемые сайты: @supportedSitesSummary
+    </div>
+}
 <Flex Justify="space-evenly" Wrap="wrap">
     @foreach (var recipe in Recipes)
     {
@@ -35,6 +57,16 @@
                     <Button Icon="@IconType.Outline.Edit" @onclick=@(_ => OnEditClickAsync(recipe.Id)) />
                 </Extra>
                 <Body>
+                    @if (!string.IsNullOrWhiteSpace(recipe.SourceSiteName))
+                    {
+                        <div style="margin-bottom: 8px;">
+                            <Tag Color="processing">@recipe.SourceSiteName</Tag>
+                            @if (!string.IsNullOrWhiteSpace(recipe.SourceUrl))
+                            {
+                                <a href="@recipe.SourceUrl" target="_blank" rel="noopener noreferrer">Оригинал</a>
+                            }
+                        </div>
+                    }
                     @((MarkupString)recipe.Content)
                 </Body>
             </Card>
@@ -48,9 +80,22 @@
     private RecipeCreateEditModal? recipeCreateEditModal;
     private RecipeBlazorModel? deleteDraft;
     private ConfirmationModal? deleteConfirmation;
+    private string importUrl = string.Empty;
+    private bool isImporting;
+    private string? importError;
+    private List<RecipeImportSourceSiteBlazorModel> supportedImportSites = new();
+    private string supportedSitesSummary = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
+        using (var db = dbFactory.Create())
+        {
+            var recipeService = db.GetService<RecipeService>();
+            supportedImportSites = recipeService.GetSupportedImportSites();
+            supportedSitesSummary = string.Join("; ", supportedImportSites
+                .Select(site => $"{site.Name} ({string.Join(", ", site.Hosts)})"));
+        }
+
         await GetItemsAsync();
         await base.OnInitializedAsync();
     }
@@ -115,5 +160,38 @@
 
         await GetItemsAsync();
         StateHasChanged();
+    }
+
+    private async Task OnImportClickAsync()
+    {
+        importError = null;
+
+        if (string.IsNullOrWhiteSpace(importUrl))
+        {
+            importError = "Укажите ссылку на рецепт для импорта.";
+            return;
+        }
+
+        isImporting = true;
+        StateHasChanged();
+
+        try
+        {
+            using var db = dbFactory.Create();
+            var recipeService = db.GetService<RecipeService>();
+            await recipeService.ImportRecipeAsync(importUrl.Trim());
+            importUrl = string.Empty;
+
+            await GetItemsAsync();
+        }
+        catch (Exception ex)
+        {
+            importError = ex.Message;
+        }
+        finally
+        {
+            isImporting = false;
+            StateHasChanged();
+        }
     }
 }
